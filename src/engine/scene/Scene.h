@@ -102,7 +102,6 @@ namespace Atlas {
 
             Ref<Ocean::Ocean> ocean = nullptr;
             Ref<Terrain::Terrain> terrain = nullptr;
-            Ref<Vegetation> vegetation = nullptr;
             Ref<Physics::PhysicsWorld> physicsWorld = nullptr;
             Ref<RayTracing::RayTracingWorld> rayTracingWorld = nullptr;
 

@@ -45,8 +45,6 @@ namespace Atlas {
 
             opaqueRenderer.Init(device);
             shadowRenderer.Init(device);
-            impostorShadowRenderer.Init(device);
-            terrainShadowRenderer.Init(device);
             downscaleRenderer.Init(device);
             ddgiRenderer.Init(device);
             giRenderer.Init(device);
@@ -57,12 +55,9 @@ namespace Atlas {
             indirectLightRenderer.Init(device);
             skyboxRenderer.Init(device);
             atmosphereRenderer.Init(device);
-            oceanRenderer.Init(device);
-            volumetricCloudRenderer.Init(device);
-            volumetricRenderer.Init(device);
-            taaRenderer.Init(device);
-            postProcessRenderer.Init(device);
             pathTracingRenderer.Init(device);
+            postProcessRenderer.Init(device);
+            taaRenderer.Init(device);
 
             textRenderer.Init(device);
             textureRenderer.Init(device);
@@ -135,8 +130,6 @@ namespace Atlas {
             auto materialBuffer = device->CreateBuffer(materialBufferDesc);
             commandList->BindBuffer(materialBuffer, 1, 14);
 
-            if (scene->vegetation)
-                vegetationRenderer.helper.PrepareInstanceBuffer(*scene->vegetation, camera, commandList);
 
             if (scene->ocean && scene->ocean->enable)
                 scene->ocean->simulation.Compute(commandList);
@@ -164,7 +157,6 @@ namespace Atlas {
             {
                 shadowRenderer.Render(target, scene, commandList, &renderList);
 
-                terrainShadowRenderer.Render(target, scene, commandList);
             }
 
             if (scene->sky.GetProbe()) {
@@ -174,7 +166,6 @@ namespace Atlas {
                     scene->sky.GetProbe()->filteredDiffuse.sampler, 1, 11);
             }
 
-            volumetricCloudRenderer.RenderShadow(target, scene, commandList);
 
             {
                 VkImageLayout layout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
@@ -209,16 +200,12 @@ namespace Atlas {
 
                 ddgiRenderer.DebugProbes(target, scene, commandList, materialMap);
 
-                vegetationRenderer.Render(target, scene, commandList, materialMap);
-
-
 
                 commandList->EndRenderPass();
 
                 Graphics::Profiler::EndQuery();
             }
 
-            oceanRenderer.RenderDepthOnly(target, scene, commandList);
 
             auto targetData = target->GetData(FULL_RES);
 
@@ -324,13 +311,6 @@ namespace Atlas {
             // This was needed after the ocean renderer, if we ever want to have alpha transparency we need it again
             // downscaleRenderer.Downscale(target, commandList);
 
-            {
-                volumetricCloudRenderer.Render(target, scene, commandList);
-
-                volumetricRenderer.Render(target, scene, commandList);
-            }
-
-            oceanRenderer.Render(target, scene, commandList);
 
             {
                 taaRenderer.Render(target, scene, commandList);

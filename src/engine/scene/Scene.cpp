@@ -246,11 +246,6 @@ namespace Atlas {
             }
 
             auto meshes = GetMeshes();
-            if (vegetation) {
-                auto vegMeshes = vegetation->GetMeshes();
-                meshes.insert(meshes.end(), vegMeshes.begin(), vegMeshes.end());
-            }
-
             for (const auto& mesh : meshes) {
                 if (!mesh.IsLoaded())
                     continue;

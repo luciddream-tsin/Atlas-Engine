@@ -28,7 +28,6 @@
 #include "SSSRenderer.h"
 #include "VolumetricRenderer.h"
 #include "VolumetricCloudRenderer.h"
-#include "VegetationRenderer.h"
 #include "TextureRenderer.h"
 #include "PathTracingRenderer.h"
 
@@ -59,7 +58,6 @@ namespace Atlas {
 
             TextRenderer textRenderer;
             TextureRenderer textureRenderer;
-            OceanRenderer oceanRenderer;
             AtmosphereRenderer atmosphereRenderer;
             PathTracingRenderer pathTracingRenderer;
 
@@ -158,10 +156,6 @@ namespace Atlas {
 
             OpaqueRenderer opaqueRenderer;
             ShadowRenderer shadowRenderer;
-            ImpostorShadowRenderer impostorShadowRenderer;
-            VegetationRenderer vegetationRenderer;
-            TerrainShadowRenderer terrainShadowRenderer;
-            DecalRenderer decalRenderer;
             DirectLightRenderer directLightRenderer;
             IndirectLightRenderer indirectLightRenderer;
 
@@ -174,8 +168,6 @@ namespace Atlas {
             AORenderer aoRenderer;
             RTReflectionRenderer rtrRenderer;
             SSSRenderer sssRenderer;
-            VolumetricRenderer volumetricRenderer;
-            VolumetricCloudRenderer volumetricCloudRenderer;
 
             RenderList renderList;
 

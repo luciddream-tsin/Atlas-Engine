@@ -3,7 +3,7 @@
 
 #include "graphics/Extensions.h"
 #include "../common/Path.h"
-
+#include "algorithm"
 namespace Atlas {
 
     namespace Loader {

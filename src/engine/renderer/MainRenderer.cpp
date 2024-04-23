@@ -44,7 +44,6 @@ namespace Atlas {
             ddgiUniformBuffer = device->CreateMultiBuffer(uniformBufferDesc);
 
             opaqueRenderer.Init(device);
-            impostorRenderer.Init(device);
             terrainRenderer.Init(device);
             shadowRenderer.Init(device);
             impostorShadowRenderer.Init(device);
@@ -215,7 +214,6 @@ namespace Atlas {
 
                 terrainRenderer.Render(target, scene, commandList, materialMap);
 
-                impostorRenderer.Render(target, scene, commandList, &renderList, materialMap);
 
                 commandList->EndRenderPass();
 

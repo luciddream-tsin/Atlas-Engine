@@ -157,7 +157,6 @@ namespace Atlas {
             Buffer::VertexArray cubeVertexArray;
 
             OpaqueRenderer opaqueRenderer;
-            TerrainRenderer terrainRenderer;
             ShadowRenderer shadowRenderer;
             ImpostorShadowRenderer impostorShadowRenderer;
             VegetationRenderer vegetationRenderer;

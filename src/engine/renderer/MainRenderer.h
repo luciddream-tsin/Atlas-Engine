@@ -39,8 +39,6 @@ namespace Atlas {
             void RenderScene(Ref<Viewport> viewport, Ref<RenderTarget> target, Ref<Scene::Scene> scene,
                 Ref<PrimitiveBatch> batch = nullptr, Texture::Texture2D* texture = nullptr);
 
-
-
             void Update();
 
             TextRenderer textRenderer;

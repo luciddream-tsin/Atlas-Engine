@@ -10,8 +10,6 @@ namespace Atlas {
 
             this->device = device;
 
-            impostorRenderer.Init(device);
-
         }
 
         void ShadowRenderer::Render(Ref<RenderTarget> target, Ref<Scene::Scene> scene, Graphics::CommandList* commandList, RenderList* renderList) {
@@ -129,13 +127,9 @@ namespace Atlas {
 
                     }
 
-                    impostorRenderer.Render(frameBuffer, renderList, commandList,
-                        shadowPass, component->viewMatrix, component->projectionMatrix, lightLocation);
-
                     commandList->EndRenderPass();
 
                 }
-
             }
 
             lightMap = usedLightMap;

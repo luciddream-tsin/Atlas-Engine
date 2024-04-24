@@ -40,8 +40,6 @@ namespace Atlas {
 
             LightMap lightMap;
 
-            ImpostorShadowRenderer impostorRenderer;
-
         };
 
     }

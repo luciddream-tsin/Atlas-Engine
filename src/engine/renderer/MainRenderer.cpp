@@ -32,10 +32,10 @@ namespace Atlas {
             PreintegrateBRDF();
 
             auto uniformBufferDesc = Graphics::BufferDesc {
-                .usageFlags = VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
-                .domain = Graphics::BufferDomain::Host,
-                .hostAccess = Graphics::BufferHostAccess::Sequential,
-                .size = sizeof(GlobalUniforms),
+                    .usageFlags = VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
+                    .domain = Graphics::BufferDomain::Host,
+                    .hostAccess = Graphics::BufferHostAccess::Sequential,
+                    .size = sizeof(GlobalUniforms),
             };
             globalUniformBuffer = device->CreateMultiBuffer(uniformBufferDesc);
 
@@ -54,7 +54,7 @@ namespace Atlas {
         }
 
         void MainRenderer::RenderScene(Ref<Viewport> viewport, Ref<RenderTarget> target, Ref<Scene::Scene> scene,
-            Ref<PrimitiveBatch> batch, Texture::Texture2D* texture) {
+                                       Ref<PrimitiveBatch> batch, Texture::Texture2D* texture) {
 
             if (!device->swapChain->isComplete || !scene->HasMainCamera())
                 return;
@@ -64,7 +64,7 @@ namespace Atlas {
 
             commandList->BeginCommands();
 
-                camera.Jitter(vec2(0.0f));
+            camera.Jitter(vec2(0.0f));
 
             Graphics::Profiler::BeginThread("Main renderer", commandList);
             Graphics::Profiler::BeginQuery("Render scene");
@@ -90,11 +90,11 @@ namespace Atlas {
                 commandList->BindSampledImages(images, 0, 3);
 
             auto materialBufferDesc = Graphics::BufferDesc {
-                .usageFlags = VK_BUFFER_USAGE_STORAGE_BUFFER_BIT,
-                .domain = Graphics::BufferDomain::Host,
-                .hostAccess = Graphics::BufferHostAccess::Sequential,
-                .data = materials.data(),
-                .size = sizeof(PackedMaterial) * glm::max(materials.size(), size_t(1)),
+                    .usageFlags = VK_BUFFER_USAGE_STORAGE_BUFFER_BIT,
+                    .domain = Graphics::BufferDomain::Host,
+                    .hostAccess = Graphics::BufferHostAccess::Sequential,
+                    .data = materials.data(),
+                    .size = sizeof(PackedMaterial) * glm::max(materials.size(), size_t(1)),
             };
             auto materialBuffer = device->CreateBuffer(materialBufferDesc);
             commandList->BindBuffer(materialBuffer, 1, 14);
@@ -125,7 +125,7 @@ namespace Atlas {
 
                     auto shadow = light.shadow;
                     imageBarriers.push_back({ shadow->useCubemap ?
-                        shadow->cubemap.image : shadow->maps.image, layout, access });
+                                              shadow->cubemap.image : shadow->maps.image, layout, access });
                 }
                 commandList->PipelineBarrier(imageBarriers, bufferBarriers, VK_PIPELINE_STAGE_ALL_GRAPHICS_BIT);
             }
@@ -160,17 +160,17 @@ namespace Atlas {
 
                 std::vector<Graphics::BufferBarrier> bufferBarriers;
                 std::vector<Graphics::ImageBarrier> imageBarriers = {
-                    {rtData->baseColorTexture->image, layout, access},
-                    {rtData->depthTexture->image, layout, access},
-                    {rtData->normalTexture->image, layout, access},
-                    {rtData->geometryNormalTexture->image, layout, access},
-                    {rtData->roughnessMetallicAoTexture->image, layout, access},
-                    {rtData->offsetTexture->image, layout, access},
-                    {rtData->materialIdxTexture->image, layout, access},
-                    {rtData->stencilTexture->image, layout, access},
-                    {rtData->velocityTexture->image, layout, access},
-                    {target->oceanStencilTexture.image, layout, access},
-                    {target->oceanDepthTexture.image, layout, access}
+                        {rtData->baseColorTexture->image, layout, access},
+                        {rtData->depthTexture->image, layout, access},
+                        {rtData->normalTexture->image, layout, access},
+                        {rtData->geometryNormalTexture->image, layout, access},
+                        {rtData->roughnessMetallicAoTexture->image, layout, access},
+                        {rtData->offsetTexture->image, layout, access},
+                        {rtData->materialIdxTexture->image, layout, access},
+                        {rtData->stencilTexture->image, layout, access},
+                        {rtData->velocityTexture->image, layout, access},
+                        {target->oceanStencilTexture.image, layout, access},
+                        {target->oceanDepthTexture.image, layout, access}
                 };
 
                 commandList->PipelineBarrier(imageBarriers, bufferBarriers, VK_PIPELINE_STAGE_ALL_GRAPHICS_BIT);
@@ -178,28 +178,26 @@ namespace Atlas {
 
 
             downscaleRenderer.Downscale(target, commandList);
-
             aoRenderer.Render(target, scene, commandList);
-
             sssRenderer.Render(target, scene, commandList);
 
             {
                 Graphics::Profiler::BeginQuery("Lighting pass");
 
                 commandList->ImageMemoryBarrier(target->lightingTexture.image, VK_IMAGE_LAYOUT_GENERAL,
-                    VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT);
+                                                VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT);
 
                 directLightRenderer.Render(target, scene, commandList);
 
                 commandList->ImageMemoryBarrier(target->lightingTexture.image, VK_IMAGE_LAYOUT_GENERAL,
-                    VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT);
+                                                VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT);
 
 
                 Graphics::ImageBarrier outBarrier(target->lightingTexture.image,
-                    VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, VK_ACCESS_SHADER_READ_BIT);
+                                                  VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, VK_ACCESS_SHADER_READ_BIT);
 
                 commandList->ImageMemoryBarrier(outBarrier, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT,
-                    VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT | VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT);
+                                                VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT | VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT);
 
                 Graphics::Profiler::EndQuery();
             }
@@ -227,34 +225,34 @@ namespace Atlas {
                 return;
 
             auto samplerDesc = Graphics::SamplerDesc {
-                .filter = VK_FILTER_LINEAR,
-                .mode = VK_SAMPLER_ADDRESS_MODE_REPEAT,
-                .mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR,
-                .maxLod = 12,
-                .anisotropicFiltering = true
+                    .filter = VK_FILTER_LINEAR,
+                    .mode = VK_SAMPLER_ADDRESS_MODE_REPEAT,
+                    .mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR,
+                    .maxLod = 12,
+                    .anisotropicFiltering = true
             };
             globalSampler = device->CreateSampler(samplerDesc);
 
             auto layoutDesc = Graphics::DescriptorSetLayoutDesc{
-                .bindings = {
-                    {
-                        .bindingIdx = 0, .descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
-                        .descriptorCount = 8192, .bindless = true
+                    .bindings = {
+                            {
+                                    .bindingIdx = 0, .descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
+                                    .descriptorCount = 8192, .bindless = true
+                            },
+                            {
+                                    .bindingIdx = 1, .descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
+                                    .descriptorCount = 8192, .bindless = true
+                            },
+                            {
+                                    .bindingIdx = 2, .descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
+                                    .descriptorCount = 8192, .bindless = true
+                            },
+                            {
+                                    .bindingIdx = 3, .descriptorType = VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE,
+                                    .descriptorCount = 16384, .bindless = true
+                            }
                     },
-                    {
-                        .bindingIdx = 1, .descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
-                        .descriptorCount = 8192, .bindless = true
-                    },
-                    {
-                        .bindingIdx = 2, .descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
-                        .descriptorCount = 8192, .bindless = true
-                    },
-                    {
-                        .bindingIdx = 3, .descriptorType = VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE,
-                        .descriptorCount = 16384, .bindless = true
-                    }
-                },
-                .bindingCount = 4
+                    .bindingCount = 4
             };
             globalDescriptorSetLayout = device->CreateDescriptorSetLayout(layoutDesc);
 
@@ -265,25 +263,25 @@ namespace Atlas {
         void MainRenderer::SetUniforms(Ref<Scene::Scene> scene, const CameraComponent& camera) {
 
             auto globalUniforms = GlobalUniforms {
-                .vMatrix = camera.viewMatrix,
-                .pMatrix = camera.projectionMatrix,
-                .ivMatrix = camera.invViewMatrix,
-                .ipMatrix = camera.invProjectionMatrix,
-                .pvMatrixLast = camera.GetLastJitteredMatrix(),
-                .pvMatrixCurrent = camera.projectionMatrix * camera.viewMatrix,
-                .jitterLast = camera.GetLastJitter(),
-                .jitterCurrent = camera.GetJitter(),
-                .cameraLocation = vec4(camera.location, 0.0f),
-                .cameraDirection = vec4(camera.direction, 0.0f),
-                .cameraUp = vec4(camera.up, 0.0f),
-                .cameraRight = vec4(camera.right, 0.0f),
-                .planetCenter = vec4(scene->sky.planetCenter, 0.0f),
-                .windDir = glm::normalize(scene->wind.direction),
-                .windSpeed = scene->wind.speed,
-                .planetRadius = scene->sky.planetRadius,
-                .time = Clock::Get(),
-                .deltaTime = Clock::GetDelta(),
-                .frameCount = frameCount
+                    .vMatrix = camera.viewMatrix,
+                    .pMatrix = camera.projectionMatrix,
+                    .ivMatrix = camera.invViewMatrix,
+                    .ipMatrix = camera.invProjectionMatrix,
+                    .pvMatrixLast = camera.GetLastJitteredMatrix(),
+                    .pvMatrixCurrent = camera.projectionMatrix * camera.viewMatrix,
+                    .jitterLast = camera.GetLastJitter(),
+                    .jitterCurrent = camera.GetJitter(),
+                    .cameraLocation = vec4(camera.location, 0.0f),
+                    .cameraDirection = vec4(camera.direction, 0.0f),
+                    .cameraUp = vec4(camera.up, 0.0f),
+                    .cameraRight = vec4(camera.right, 0.0f),
+                    .planetCenter = vec4(scene->sky.planetCenter, 0.0f),
+                    .windDir = glm::normalize(scene->wind.direction),
+                    .windSpeed = scene->wind.speed,
+                    .planetRadius = scene->sky.planetRadius,
+                    .time = Clock::Get(),
+                    .deltaTime = Clock::GetDelta(),
+                    .frameCount = frameCount
             };
 
             auto frustumPlanes = camera.frustum.GetPlanes();
@@ -297,11 +295,11 @@ namespace Atlas {
 
                 auto impostor = mesh->impostor;
                 Mesh::Impostor::ImpostorInfo impostorInfo = {
-                    .center = vec4(impostor->center, 1.0f),
-                    .radius = impostor->radius,
-                    .views = impostor->views,
-                    .cutoff = impostor->cutoff,
-                    .mipBias = impostor->mipBias
+                        .center = vec4(impostor->center, 1.0f),
+                        .radius = impostor->radius,
+                        .views = impostor->views,
+                        .cutoff = impostor->cutoff,
+                        .mipBias = impostor->mipBias
                 };
 
                 impostor->impostorInfoBuffer.SetData(&impostorInfo, 0);
@@ -310,7 +308,7 @@ namespace Atlas {
         }
 
         void MainRenderer::PrepareMaterials(Ref<Scene::Scene> scene, std::vector<PackedMaterial>& materials,
-            std::unordered_map<void*, uint16_t>& materialMap) {
+                                            std::unordered_map<void*, uint16_t>& materialMap) {
 
             auto sceneMaterials = scene->GetMaterials();
 
@@ -359,7 +357,7 @@ namespace Atlas {
 
                 materialMap[material] = idx++;
             }
-            
+
             auto meshes = scene->GetMeshes();
 
             for (auto mesh : meshes) {
@@ -398,8 +396,8 @@ namespace Atlas {
 
                 packed.features = 0;
 
-                packed.features |= FEATURE_BASE_COLOR_MAP | 
-                    FEATURE_ROUGHNESS_MAP | FEATURE_METALNESS_MAP | FEATURE_AO_MAP;
+                packed.features |= FEATURE_BASE_COLOR_MAP |
+                                   FEATURE_ROUGHNESS_MAP | FEATURE_METALNESS_MAP | FEATURE_AO_MAP;
                 packed.features |= glm::length(impostor->transmissiveColor) > 0.0f ? FEATURE_TRANSMISSION : 0;
 
                 materials.push_back(packed);
@@ -411,8 +409,8 @@ namespace Atlas {
         }
 
         void MainRenderer::PrepareBindlessData(Ref<Scene::Scene> scene, std::vector<Ref<Graphics::Image>>& images,
-            std::vector<Ref<Graphics::Buffer>>& blasBuffers, std::vector<Ref<Graphics::Buffer>>& triangleBuffers,
-            std::vector<Ref<Graphics::Buffer>>& bvhTriangleBuffers, std::vector<Ref<Graphics::Buffer>>& triangleOffsetBuffers) {
+                                               std::vector<Ref<Graphics::Buffer>>& blasBuffers, std::vector<Ref<Graphics::Buffer>>& triangleBuffers,
+                                               std::vector<Ref<Graphics::Buffer>>& bvhTriangleBuffers, std::vector<Ref<Graphics::Buffer>>& triangleOffsetBuffers) {
 
             if (!device->support.bindless)
                 return;
@@ -432,7 +430,7 @@ namespace Atlas {
                 auto bvhTriangleBuffer = mesh->bvhTriangleBuffer.Get();
                 auto triangleOffsetBuffer = mesh->triangleOffsetBuffer.Get();
 
-                AE_ASSERT(triangleBuffer != nullptr);
+                        AE_ASSERT(triangleBuffer != nullptr);
 
                 blasBuffers[idx] = blasBuffer;
                 triangleBuffers[idx] = triangleBuffer;
@@ -469,7 +467,7 @@ namespace Atlas {
                 auto& shadow = light.shadow;
 
                 auto componentCount = shadow->longRange ?
-                    shadow->componentCount - 1 : shadow->componentCount;
+                                      shadow->componentCount - 1 : shadow->componentCount;
 
                 for (int32_t i = 0; i < componentCount; i++) {
                     auto component = &shadow->components[i];
@@ -493,7 +491,7 @@ namespace Atlas {
 
             const int32_t res = 256;
             dfgPreintegrationTexture = Texture::Texture2D(res, res, VK_FORMAT_R16G16B16A16_SFLOAT,
-                Texture::Wrapping::ClampToEdge, Texture::Filtering::Linear);
+                                                          Texture::Wrapping::ClampToEdge, Texture::Filtering::Linear);
 
             auto commandList = device->GetCommandList(Graphics::QueueType::GraphicsQueue, true);
 
@@ -501,9 +499,9 @@ namespace Atlas {
             commandList->BindPipeline(computePipeline);
 
             auto barrier = Graphics::ImageBarrier(VK_IMAGE_LAYOUT_GENERAL,
-                VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT);
+                                                  VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT);
             commandList->ImageMemoryBarrier(barrier.Update(dfgPreintegrationTexture.image),
-                VK_PIPELINE_STAGE_ALL_COMMANDS_BIT, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT);
+                                            VK_PIPELINE_STAGE_ALL_COMMANDS_BIT, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT);
 
             uint32_t groupCount = res / 8;
 
@@ -511,9 +509,9 @@ namespace Atlas {
             commandList->Dispatch(groupCount, groupCount, 1);
 
             barrier = Graphics::ImageBarrier(VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
-                VK_ACCESS_SHADER_READ_BIT);
+                                             VK_ACCESS_SHADER_READ_BIT);
             commandList->ImageMemoryBarrier(barrier.Update(dfgPreintegrationTexture.image),
-                VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, VK_PIPELINE_STAGE_ALL_COMMANDS_BIT);
+                                            VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, VK_PIPELINE_STAGE_ALL_COMMANDS_BIT);
 
             commandList->EndCommands();
             device->FlushCommandList(commandList);

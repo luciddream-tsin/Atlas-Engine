@@ -15,15 +15,10 @@ namespace Atlas {
         public:
             Sky();
 
-            Ref<EnvironmentProbe> GetProbe();
 
             vec3 planetCenter = vec3(0.0f, -650000.0f, 0.0f);
             float planetRadius = 649000.0f;
 
-            Ref<Atmosphere> atmosphere = CreateRef<Atmosphere>();
-            Ref<VolumetricClouds> clouds = nullptr;
-
-            Ref<EnvironmentProbe> probe = nullptr;
 
         };
 

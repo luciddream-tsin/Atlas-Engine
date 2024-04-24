@@ -8,16 +8,12 @@
 #include "OpaqueRenderer.h"
 #include "ImpostorRenderer.h"
 #include "TerrainRenderer.h"
-#include "OceanRenderer.h"
 #include "ShadowRenderer.h"
 #include "ImpostorShadowRenderer.h"
 #include "TerrainShadowRenderer.h"
 #include "DecalRenderer.h"
 #include "DirectLightRenderer.h"
-#include "IndirectLightRenderer.h"
 #include "TemporalAARenderer.h"
-#include "SkyboxRenderer.h"
-#include "AtmosphereRenderer.h"
 #include "PostProcessRenderer.h"
 #include "GBufferDownscaleRenderer.h"
 #include "TextRenderer.h"
@@ -26,8 +22,6 @@
 #include "AORenderer.h"
 #include "RTReflectionRenderer.h"
 #include "SSSRenderer.h"
-#include "VolumetricRenderer.h"
-#include "VolumetricCloudRenderer.h"
 #include "TextureRenderer.h"
 #include "PathTracingRenderer.h"
 
@@ -45,20 +39,12 @@ namespace Atlas {
             void RenderScene(Ref<Viewport> viewport, Ref<RenderTarget> target, Ref<Scene::Scene> scene,
                 Ref<PrimitiveBatch> batch = nullptr, Texture::Texture2D* texture = nullptr);
 
-            void PathTraceScene(Ref<Viewport> viewport, Ref<PathTracerRenderTarget> target,
-                Ref<Scene::Scene> scene, Texture::Texture2D* texture = nullptr);
 
-            void RenderBatched(Ref<Viewport> viewport, Ref<PrimitiveBatch> batch, const CameraComponent& camera);
-
-            void RenderProbe(Ref<Lighting::EnvironmentProbe> probe, Ref<RenderTarget> target, Ref<Scene::Scene> scene);
-
-            void FilterProbe(Ref<Lighting::EnvironmentProbe> probe, Graphics::CommandList* commandList);
 
             void Update();
 
             TextRenderer textRenderer;
             TextureRenderer textureRenderer;
-            AtmosphereRenderer atmosphereRenderer;
             PathTracingRenderer pathTracingRenderer;
 
         private:
@@ -146,8 +132,6 @@ namespace Atlas {
             Texture::Texture2D dfgPreintegrationTexture;
 
             Ref<Graphics::MultiBuffer> globalUniformBuffer;
-            Ref<Graphics::MultiBuffer> pathTraceGlobalUniformBuffer;
-            Ref<Graphics::MultiBuffer> ddgiUniformBuffer;
             Ref<Graphics::DescriptorSetLayout> globalDescriptorSetLayout;
             Ref<Graphics::Sampler> globalSampler;
 
@@ -157,16 +141,9 @@ namespace Atlas {
             OpaqueRenderer opaqueRenderer;
             ShadowRenderer shadowRenderer;
             DirectLightRenderer directLightRenderer;
-            IndirectLightRenderer indirectLightRenderer;
 
-            TemporalAARenderer taaRenderer;
-            SkyboxRenderer skyboxRenderer;
-            PostProcessRenderer postProcessRenderer;
             GBufferDownscaleRenderer downscaleRenderer;
-            GIRenderer giRenderer;
-            DDGIRenderer ddgiRenderer;
             AORenderer aoRenderer;
-            RTReflectionRenderer rtrRenderer;
             SSSRenderer sssRenderer;
 
             RenderList renderList;

@@ -91,7 +91,6 @@ void App::LoadContent() {
     scene->fog->heightFalloff = 0.0284f;
     scene->fog->height = 0.0f;
 
-    scene->sky.atmosphere = Atlas::CreateRef<Atlas::Lighting::Atmosphere>();
 
     scene->postProcessing.taa = Atlas::PostProcessing::TAA(0.99f);
     scene->postProcessing.sharpen.enable = true;
@@ -248,16 +247,7 @@ void App::Render(float deltaTime) {
 
     static bool firstFrame = true;
     static bool animateLight = false;
-    static bool pathTrace = false;
-    static bool debugAo = false;
-    static bool debugReflection = false;
-    static bool debugClouds = false;
-    static bool debugSSS = false;
-    static bool debugSSGI = false;
-    static bool debugMotion = false;
     static bool slowMode = false;
-
-    static float cloudDepthDebug = 0.0f;
 
 #ifndef AE_HEADLESS
     auto windowFlags = window.GetFlags();
@@ -275,50 +265,10 @@ void App::Render(float deltaTime) {
     if (animateLight) directionalLight.properties.directional.direction
         = glm::vec3(0.0f, -1.0f, sin(Atlas::Clock::Get() / 10.0f));
 
-    if (pathTrace) {
-        viewport->Set(0, 0, pathTraceTarget->GetWidth(), pathTraceTarget->GetHeight());
-        mainRenderer->PathTraceScene(viewport, pathTraceTarget, scene);
-    }
-    else {
+
+    {
         mainRenderer->RenderScene(viewport, renderTarget, scene);
 
-        auto debug = debugAo || debugReflection || debugClouds || debugSSS || debugSSGI || debugMotion;
-
-        if (debug && graphicsDevice->swapChain->isComplete) {
-            auto commandList = graphicsDevice->GetCommandList(Atlas::Graphics::GraphicsQueue);
-            commandList->BeginCommands();
-            commandList->BeginRenderPass(graphicsDevice->swapChain, true);
-
-            if (debugAo) {
-                mainRenderer->textureRenderer.RenderTexture2D(commandList, viewport, &renderTarget->aoTexture,
-                    0.0f, 0.0f, float(viewport->width), float(viewport->height), 0.0, 1.0f, false, true);
-            }
-            else if (debugReflection) {
-                mainRenderer->textureRenderer.RenderTexture2D(commandList, viewport, &renderTarget->reflectionTexture,
-                    0.0f, 0.0f, float(viewport->width), float(viewport->height), 0.0, 1.0f, false, true);
-            }
-            else if (debugClouds) {
-                mainRenderer->textureRenderer.RenderTexture2D(commandList, viewport, &renderTarget->volumetricCloudsTexture,
-                    0.0f, 0.0f, float(viewport->width), float(viewport->height), 0.0, 1.0f, false, true);
-            }
-            else if (debugSSS) {
-                mainRenderer->textureRenderer.RenderTexture2D(commandList, viewport, &renderTarget->sssTexture,
-                    0.0f, 0.0f, float(viewport->width), float(viewport->height), 0.0, 1.0f, false, true);
-            }
-            else if (debugSSGI) {
-                mainRenderer->textureRenderer.RenderTexture2D(commandList, viewport, &renderTarget->giTexture,
-                    0.0f, 0.0f, float(viewport->width), float(viewport->height), 0.0, 1.0f, false, true);
-            }
-            else if (debugMotion) {
-                mainRenderer->textureRenderer.RenderTexture2D(commandList, viewport,
-                    renderTarget->GetData(Atlas::FULL_RES)->velocityTexture.get(),
-                    0.0f, 0.0f, float(viewport->width), float(viewport->height), 0.0, 10.0f, false, true);
-            }
-
-            commandList->EndRenderPass();
-            commandList->EndCommands();
-            graphicsDevice->SubmitCommandList(commandList);
-        }
     }
 
     float averageFramerate = Atlas::Clock::GetAverage();
@@ -335,7 +285,6 @@ void App::Render(float deltaTime) {
         const auto& ao = scene->ao;
         const auto& fog = scene->fog;
         const auto& reflection = scene->reflection;
-        const auto& clouds = scene->sky.clouds;
         const auto& sss = scene->sss;
         const auto& ssgi = scene->ssgi;
         const auto& volumetric = scene->volumetric;
@@ -367,7 +316,6 @@ void App::Render(float deltaTime) {
         }
 
         if (ImGui::Begin("Settings", (bool*)0, ImGuiWindowFlags_HorizontalScrollbar)) {
-            if(pathTrace) ImGui::Text("Samples: %d", mainRenderer->pathTracingRenderer.GetSampleCount());
             ImGui::Text("Average frametime: %.3f ms", averageFramerate * 1000.0f);
             ImGui::Text("Current frametime: %.3f ms", deltaTime * 1000.0f);
             ImGui::Text("Camera location: %s", vecToString(camera.location).c_str());
@@ -452,90 +400,7 @@ void App::Render(float deltaTime) {
                 }
 
             }
-            if (ImGui::CollapsingHeader("Pathtracing")) {
-                bool pathTraceEnabled = pathTrace;
-                ImGui::Checkbox("Enable##Pathtrace", &pathTrace);
-                ImGui::SliderInt("Bounces##Pathtrace", &mainRenderer->pathTracingRenderer.bounces, 0, 100);
-                ImGui::Checkbox("Sample emissives##Pathtrace", &mainRenderer->pathTracingRenderer.sampleEmissives);
-                ImGui::Text("Realtime");
-                ImGui::Checkbox("Realtime##Pathtrace", &mainRenderer->pathTracingRenderer.realTime);
-                ImGui::SliderInt("Samples per frame##Pathtrace", &mainRenderer->pathTracingRenderer.realTimeSamplesPerFrame, 1, 100);                
-                ImGui::Text("Realtime denoiser");
-                ImGui::SliderInt("Max accumulated frames##Pathtrace", &mainRenderer->pathTracingRenderer.historyLengthMax, 1, 256);
-                ImGui::SliderFloat("Current clip##Pathtrace", &mainRenderer->pathTracingRenderer.currentClipFactor, 0.1f, 4.0f);
-                ImGui::SliderFloat("Max history clip##Pathtrace", &mainRenderer->pathTracingRenderer.historyClipMax, 0.0f, 1.0f);
-            }
-            if (ImGui::CollapsingHeader("DDGI")) {
-                ImGui::Text("Probe count: %s", vecToString(volume->probeCount).c_str());
-                ImGui::Text("Cell size: %s", vecToString(volume->cellSize).c_str());
-                ImGui::Checkbox("Enable volume##DDGI", &volume->enable);
-                ImGui::Checkbox("Update volume##DDGI", &volume->update);
-                ImGui::Checkbox("Visualize probes##DDGI", &volume->debug);
-                ImGui::Checkbox("Sample emissives##DDGI", &volume->sampleEmissives);
-                ImGui::Checkbox("Use shadow map##DDGI", &volume->useShadowMap);
-                ImGui::Checkbox("Opacity check##DDGI", &volume->opacityCheck);
-                if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled)) {
-                    ImGui::SetTooltip("Uses the shadow map to calculate shadows in reflections. \
-                        This is only possible when cascaded shadow maps are not used.");
-                }
 
-                const char* gridResItems [] = { "5x5x5", "10x10x10", "20x20x20", "30x30x30" };
-                int currentItem = 0;
-                if (volume->probeCount == glm::ivec3(5)) currentItem = 0;
-                if (volume->probeCount == glm::ivec3(10)) currentItem = 1;
-                if (volume->probeCount == glm::ivec3(20)) currentItem = 2;
-                if (volume->probeCount == glm::ivec3(30)) currentItem = 3;
-                auto prevItem = currentItem;
-                ImGui::Combo("Resolution##DDGI", &currentItem, gridResItems, IM_ARRAYSIZE(gridResItems));
-
-                if (currentItem != prevItem) {
-                    switch (currentItem) {
-                        case 0: volume->SetProbeCount(glm::ivec3(5)); break;
-                        case 1: volume->SetProbeCount(glm::ivec3(10)); break;
-                        case 2: volume->SetProbeCount(glm::ivec3(20)); break;
-                        case 3: volume->SetProbeCount(glm::ivec3(30)); break;
-                    }
-                }
-
-                const char* rayCountItems[] = { "32", "64", "128", "256", "512" };
-                currentItem = 0;
-                if (volume->rayCount == 32) currentItem = 0;
-                if (volume->rayCount == 64) currentItem = 1;
-                if (volume->rayCount == 128) currentItem = 2;
-                if (volume->rayCount == 256) currentItem = 3;
-                if (volume->rayCount == 512) currentItem = 4;
-                prevItem = currentItem;
-                ImGui::Combo("Ray count##DDGI", &currentItem, rayCountItems, IM_ARRAYSIZE(rayCountItems));
-
-                if (currentItem != prevItem) {
-                    switch (currentItem) {
-                        case 0: volume->SetRayCount(32, 32); break;
-                        case 1: volume->SetRayCount(64, 32); break;
-                        case 2: volume->SetRayCount(128, 32); break;
-                        case 3: volume->SetRayCount(256, 32); break;
-                        case 4: volume->SetRayCount(512, 32); break;
-                    }
-                }
-
-                ImGui::SliderFloat("Strength##DDGI", &volume->strength, 0.0f, 5.0f);
-                ImGui::Separator();
-                ImGui::Text("AABB");
-                ImGui::SliderFloat3("Min", (float*)&volume->aabb.min, -200.0f, 200.0f);
-                ImGui::SliderFloat3("Max", (float*)&volume->aabb.max, -200.0f, 200.0f);
-                volume->SetAABB(volume->aabb);
-                ImGui::Separator();
-                ImGui::SliderFloat("Hysteresis", &volume->hysteresis, 0.0f, 1.0f, "%.3f");
-                ImGui::SliderFloat("Sharpness", &volume->sharpness, 0.01f, 200.0f, "%.3f", ImGuiSliderFlags_Logarithmic);
-                ImGui::SliderFloat("Bias", &volume->bias, 0.0f, 1.0f);
-                auto prevGamma = volume->gamma;
-                ImGui::SliderFloat("Gamma exponent", &volume->gamma, 0.0f, 10.0f, "%.3f", ImGuiSliderFlags_Logarithmic);
-                if (prevGamma != volume->gamma) volume->ClearProbes();
-                ImGui::Separator();
-                if (ImGui::Button("Reset probe offsets")) {
-                    volume->ResetProbeOffsets();
-                }
-                ImGui::Checkbox("Optimize probes", &volume->optimizeProbes);
-            }
             if (ImGui::CollapsingHeader("Light")) {
                 ImGui::Checkbox("Animate", &animateLight);
                 ImGui::SliderFloat3("Direction", &light.properties.directional.direction[0], -1.0f, 1.0f);
@@ -568,25 +433,13 @@ void App::Render(float deltaTime) {
                 ImGui::SliderFloat("Bias##Shadow", &shadow->bias, 0.0f, 2.0f);
             }
             if (ImGui::CollapsingHeader("Screen-space shadows (preview)")) {
-                ImGui::Checkbox("Debug##SSS", &debugSSS);
                 ImGui::Checkbox("Enable##SSS", &sss->enable);
                 ImGui::SliderInt("Sample count##SSS", &sss->sampleCount, 2.0, 16.0);
                 ImGui::SliderFloat("Max length##SSS", &sss->maxLength, 0.01f, 1.0f);
                 ImGui::SliderFloat("Thickness##SSS", &sss->thickness, 0.001f, 1.0f, "%.3f", ImGuiSliderFlags_Logarithmic);
             }
-            if (ImGui::CollapsingHeader("SSGI")) {
-                ImGui::Checkbox("Debug##SSGI", &debugSSGI);
-                ImGui::Checkbox("Enable##SSGI", &ssgi->enable);
-                ImGui::Checkbox("Enable ambient occlusion##SSGI", &ssgi->enableAo);
-                ImGui::SliderInt("Ray count##SSGI", &ssgi->rayCount, 1, 8);
-                ImGui::SliderInt("Sample count##SSGI", &ssgi->sampleCount, 1, 16);
-                ImGui::SliderFloat("Radius##SSGI", &ssgi->radius, 0.0f, 10.0f);
-                ImGui::SliderFloat("Ao strength##SSGI", &ssgi->aoStrength, 0.0f, 10.0f);
-                ImGui::SliderFloat("Irradiance limit##SSGI", &ssgi->irradianceLimit, 0.0f, 10.0f);
-                //ImGui::SliderInt("Sample count##Ao", &ao->s, 0.0f, 20.0f, "%.3f", 2.0f);
-            }
+
             if (ImGui::CollapsingHeader("Ambient Occlusion")) {
-                ImGui::Checkbox("Debug##Ao", &debugAo);
                 ImGui::Checkbox("Enable ambient occlusion##Ao", &ao->enable);
                 ImGui::Checkbox("Enable raytracing (preview)##Ao", &ao->rt);
                 ImGui::Checkbox("Opacity check##Ao", &ao->opacityCheck);
@@ -594,130 +447,17 @@ void App::Render(float deltaTime) {
                 ImGui::SliderFloat("Strength##Ao", &ao->strength, 0.0f, 20.0f, "%.3f", ImGuiSliderFlags_Logarithmic);
                 //ImGui::SliderInt("Sample count##Ao", &ao->s, 0.0f, 20.0f, "%.3f", 2.0f);
             }
-            if (ImGui::CollapsingHeader("Reflection (preview)")) {
-                ImGui::Checkbox("Debug##Reflection", &debugReflection);
-                ImGui::Checkbox("Enable reflection", &reflection->enable);
-                //ImGui::Checkbox("Enable raytracing##Reflection", &reflection->rt);
-                ImGui::Checkbox("Use shadow map", &reflection->useShadowMap);
-                if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled)) {
-                    ImGui::SetTooltip("Uses the shadow map to calculate shadows in reflections. \
-                        This is only possible when cascaded shadow maps are not used.");
-                }
-                ImGui::Checkbox("Enable GI in reflection", &reflection->gi);
-                ImGui::Checkbox("Opacity check##Reflection", &reflection->opacityCheck);
-                // ImGui::SliderInt("Sample count", &reflection->sampleCount, 1, 32);
-                ImGui::SliderFloat("Radiance Limit##Reflection", &reflection->radianceLimit, 0.0f, 10.0f);
-                ImGui::SliderFloat("Bias##Reflection", &reflection->bias, 0.0f, 1.0f);
-                ImGui::SliderInt("Texture level##Reflection", &reflection->textureLevel, 0, 10);
-                ImGui::Text("Denoiser");
-                ImGui::SliderFloat("Spatial filter strength##Reflection", &reflection->spatialFilterStrength, 0.0f, 10.0f);
-                ImGui::SliderFloat("Temporal weight##Reflection", &reflection->temporalWeight, 0.0f, 1.0f);
-                ImGui::SliderFloat("Maximum history clip factor##Reflection", &reflection->historyClipMax, 0.0f, 1.0f);
-                ImGui::SliderFloat("Current clip factor##Reflection", &reflection->currentClipFactor, 0.0f, 10.0f);
-            }
+
             if (ImGui::CollapsingHeader("Camera")) {
                 ImGui::SliderFloat("Exposure##Camera", &camera.exposure, 0.0f, 10.0f);
                 ImGui::SliderFloat("Speed##Camera", &cameraSpeed, 0.0f, 20.0f);
                 ImGui::SliderFloat("FOV##Camera", &camera.fieldOfView, 0.0f, 90.0f);
                 keyboardHandler.speed = cameraSpeed;
                 ImGui::Separator();
-                ImGui::Text("Camera debugging");
-                ImGui::Checkbox("Show motion vectors##MotionVecs", &debugMotion);
                 ImGui::Checkbox("Move camera", &moveCamera);
                 ImGui::Checkbox("Rotate camera", &rotateCamera);
             }
-            if (ImGui::CollapsingHeader("Fog")) {
-                ImGui::Checkbox("Enable##Fog", &fog->enable);
-                fog->color = glm::pow(fog->color, 1.0f / glm::vec3(2.2f));
-                ImGui::ColorEdit3("Color##Fog", &fog->color[0]);
-                fog->color = glm::pow(fog->color, glm::vec3(2.2f));
 
-                ImGui::SliderFloat("Density##Fog", &fog->density, 0.0f, 0.5f, "%.4f", 4.0f);
-                ImGui::SliderFloat("Height##Fog", &fog->height, 0.0f, 300.0f, "%.3f", 4.0f);
-                ImGui::SliderFloat("Height falloff##Fog", &fog->heightFalloff, 0.0f, 0.5f,
-                    "%.4f", ImGuiSliderFlags_Logarithmic);
-                ImGui::SliderFloat("Scattering anisotropy##Fog", &fog->scatteringAnisotropy, -1.0f, 1.0f,
-                    "%.3f", ImGuiSliderFlags_Logarithmic);
-            }
-            if (ImGui::CollapsingHeader("Clouds")) {
-                ImGui::Checkbox("Enable##Clouds", &clouds->enable);
-                ImGui::Checkbox("Cast shadow##Clouds", &clouds->castShadow);
-                ImGui::Checkbox("Stochastic occlusion sampling##Clouds", &clouds->stochasticOcclusionSampling);
-                ImGui::Checkbox("Debug##Clouds", &debugClouds);
-                ImGui::Text("Quality");
-                ImGui::SliderInt("Sample count##Clouds", &clouds->sampleCount, 1, 128);
-                ImGui::SliderInt("Shadow sample count##Clouds", &clouds->occlusionSampleCount, 1, 16);
-                ImGui::SliderInt("Shadow sample fraction count##Clouds", &clouds->shadowSampleFraction, 1, 4);
-                ImGui::Text("Shape");
-                ImGui::SliderFloat("Density multiplier##Clouds", &clouds->densityMultiplier, 0.0f, 1.0f);
-                ImGui::SliderFloat("Height stretch##Clouds", &clouds->heightStretch, 0.0f, 1.0f);
-                if (ImGui::Button("Update noise textures##Clouds")) {
-                    clouds->needsNoiseUpdate = true;
-                }
-                ImGui::Separator();
-                ImGui::Text("Dimensions");
-                ImGui::SliderFloat("Min height##Clouds", &clouds->minHeight, 0.0f, 2000.0f);
-                ImGui::SliderFloat("Max height##Clouds", &clouds->maxHeight, 0.0f, 4000.0f);
-                ImGui::SliderFloat("GetDistance limit##Clouds", &clouds->distanceLimit, 0.0f, 10000.0f);
-                ImGui::Separator();
-                ImGui::Text("Scattering");
-                ImGui::ColorPicker3("Extinction coefficients", &clouds->scattering.extinctionCoefficients[0]);
-                ImGui::SliderFloat("Extinction factor", &clouds->scattering.extinctionFactor, 0.0001f, 10.0f);
-                ImGui::SliderFloat("Scattering factor", &clouds->scattering.scatteringFactor, 0.0001f, 10.0f);
-                ImGui::SliderFloat("Eccentricity first phase", &clouds->scattering.eccentricityFirstPhase, -1.0f, 1.0f);
-                ImGui::SliderFloat("Eccentricity second phase", &clouds->scattering.eccentricitySecondPhase, -1.0f, 1.0f);
-                ImGui::SliderFloat("Phase alpha", &clouds->scattering.phaseAlpha, 0.0f, 1.0f);
-                ImGui::Separator();
-                ImGui::Text("Noise texture behaviour");
-                ImGui::SliderFloat("Shape scale##Clouds", &clouds->shapeScale, 0.0f, 100.0f);
-                ImGui::SliderFloat("Detail scale##Clouds", &clouds->detailScale, 0.0f, 100.0f);
-                ImGui::SliderFloat("Shape speed##Clouds", &clouds->shapeSpeed, 0.0f, 10.0f);
-                ImGui::SliderFloat("Detail speed##Clouds", &clouds->detailSpeed, 0.0f, 10.0f);
-                ImGui::SliderFloat("Detail strength##Clouds", &clouds->detailStrength, 0.0f, 1.0f);
-                ImGui::Separator();
-                ImGui::Text("Silver lining");
-                ImGui::SliderFloat("Dark edge strength##Clouds", &clouds->darkEdgeFocus, 0.0f, 1025.0f, "%.3f", ImGuiSliderFlags_Logarithmic);
-                ImGui::SliderFloat("Dark edge ambient##Clouds", &clouds->darkEdgeAmbient, 0.0f, 1.0f);
-            }
-            if (ImGui::CollapsingHeader("Postprocessing")) {
-                ImGui::Text("Temporal anti-aliasing");
-                ImGui::Checkbox("Enable##TAA", &postProcessing.taa.enable);
-                ImGui::Checkbox("Enable slow mode##SlowMode", &slowMode);
-                ImGui::SliderFloat("Jitter range##TAA", &postProcessing.taa.jitterRange, 0.001f, 0.999f);
-                ImGui::Separator();
-                ImGui::Text("Sharpen filter");
-                ImGui::Checkbox("Enable##Sharpen", &postProcessing.sharpen.enable);
-                ImGui::SliderFloat("Sharpness", &postProcessing.sharpen.factor, 0.0f, 1.0f);
-                ImGui::Separator();
-                ImGui::Text("Image effects");
-                ImGui::Checkbox("Filmic tonemapping", &postProcessing.filmicTonemapping);
-                ImGui::SliderFloat("Saturation##Postprocessing", &postProcessing.saturation, 0.0f, 2.0f);
-                ImGui::SliderFloat("Contrast##Postprocessing", &postProcessing.contrast, 0.0f, 2.0f);
-                ImGui::SliderFloat("White point##Postprocessing", &postProcessing.whitePoint, 0.0f, 100.0f, "%.3f", 2.0f);
-                ImGui::Separator();
-                ImGui::Text("Chromatic aberration");
-                ImGui::Checkbox("Enable##Chromatic aberration", &postProcessing.chromaticAberration.enable);
-                ImGui::Checkbox("Colors reversed##Chromatic aberration", &postProcessing.chromaticAberration.colorsReversed);
-                ImGui::SliderFloat("Strength##Chromatic aberration", &postProcessing.chromaticAberration.strength, 0.0f, 4.0f);
-                ImGui::Text("Film grain");
-                ImGui::Checkbox("Enable##Film grain", &postProcessing.filmGrain.enable);
-                ImGui::SliderFloat("Strength##Film grain", &postProcessing.filmGrain.strength, 0.0f, 1.0f);
-            }
-            if (ImGui::CollapsingHeader("Physics")) {
-                ImGui::Checkbox("Pause simulation##Phyiscs", &scene->physicsWorld->pauseSimulation);
-                ImGui::Text("Sphere body");
-                ImGui::SliderFloat("Sphere scale##PhysicsBody", &sphereScale, 1.0f, 10.0f);
-                ImGui::SliderFloat("Sphere density##PhysicsBody", &sphereDensity, 1.0f, 100.0f);
-                ImGui::SliderFloat("Sphere restitution##PhysicsBody", &sphereRestitution, 0.0f, 1.0f);
-                ImGui::Text("Sphere emitter");
-                ImGui::Checkbox("Enable##PhysicsEmitter", &emitSpheresEnabled);
-                ImGui::SliderFloat("Spawn rate##PhysicsEmitter", &emitSpawnRate, 0.001f, 1.0f);
-                ImGui::Separator();
-                ImGui::Text("Shoot spheres");
-                ImGui::Checkbox("Enable##PhysicsShoot", &shootSpheresEnabled);
-                ImGui::SliderFloat("Spawn rate##PhysicsShoot", &shootSpawnRate, 0.001f, 1.0f);
-                ImGui::SliderFloat("Velocity##PhysicsShoot", &shootVelocity, 0.0f, 100.0f);
-            }
             if (ImGui::CollapsingHeader("Materials")) {
                 int32_t id = 0;
                 auto materials = scene->GetMaterials();
@@ -946,13 +686,7 @@ bool App::LoadScene() {
 
     auto& camera = cameraEntity.GetComponent<CameraComponent>();
 
-    scene->sky.clouds = Atlas::CreateRef<Atlas::Lighting::VolumetricClouds>();
-    scene->sky.clouds->minHeight = 1400.0f;
-    scene->sky.clouds->maxHeight = 1700.0f;
-    scene->sky.clouds->castShadow = false;
 
-    scene->sky.probe = nullptr;
-    scene->sky.clouds->enable = true;
     scene->sss->enable = true;
 
     using namespace Atlas::Loader;
@@ -1116,7 +850,6 @@ bool App::LoadScene() {
 
         sky = Atlas::Texture::Cubemap("environment.hdr", 2048);
         probe = Atlas::Lighting::EnvironmentProbe(sky);
-        scene->sky.probe = Atlas::CreateRef(probe);
 
         // Other scene related settings apart from the mesh
         directionalLight.intensity = 10.0f;
@@ -1127,7 +860,6 @@ bool App::LoadScene() {
         camera.exposure = 1.0f;
 
         scene->fog->enable = false;
-        scene->sky.clouds->enable = false;
         scene->sss->enable = true;
         scene->volumetric->intensity = 0.0f;
     }
@@ -1183,11 +915,6 @@ bool App::LoadScene() {
         camera.location = glm::vec3(30.0f, 25.0f, 0.0f);
         camera.rotation = glm::vec2(-3.14f / 2.0f, 0.0f);
         camera.exposure = 1.0f;
-
-        scene->sky.clouds->minHeight = 700.0f;
-        scene->sky.clouds->maxHeight = 1000.0f;
-        scene->sky.clouds->densityMultiplier = 0.65f;
-        scene->sky.clouds->heightStretch = 1.0f;
 
         scene->fog->enable = true;
         scene->volumetric->intensity = 0.08f;

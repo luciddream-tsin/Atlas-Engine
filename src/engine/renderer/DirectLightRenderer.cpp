@@ -37,7 +37,6 @@ namespace Atlas {
             auto& camera = scene->GetMainCamera();
             auto& light = mainLightEntity.GetComponent<LightComponent>();
             auto sss = scene->sss;
-            auto clouds = scene->sky.clouds;
 
             vec3 direction = normalize(vec3(camera.viewMatrix *
                 vec4(light.transformedProperties.directional.direction, 0.0f)));
@@ -91,7 +90,7 @@ namespace Atlas {
             uniformBuffer.SetData(&uniforms, 0);
 
             pipelineConfig.ManageMacro("SCREEN_SPACE_SHADOWS", sss && sss->enable);
-            pipelineConfig.ManageMacro("CLOUD_SHADOWS", clouds && clouds->enable && clouds->castShadow);
+            pipelineConfig.ManageMacro("CLOUD_SHADOWS", false);
             auto pipeline = PipelineManager::GetPipeline(pipelineConfig);
             commandList->BindPipeline(pipeline);
 
@@ -103,17 +102,7 @@ namespace Atlas {
             }
 
             CloudShadow cloudShadowUniform;
-            if (clouds && clouds->enable && clouds->castShadow) {
-                clouds->shadowTexture.Bind(commandList, 3, 3);
 
-                clouds->GetShadowMatrices(camera, glm::normalize(light.transformedProperties.directional.direction),
-                    cloudShadowUniform.vMatrix, cloudShadowUniform.pMatrix);
-
-                cloudShadowUniform.ivMatrix = glm::inverse(cloudShadowUniform.vMatrix);
-                cloudShadowUniform.ipMatrix = glm::inverse(cloudShadowUniform.pMatrix);
-
-                cloudShadowUniform.vMatrix = cloudShadowUniform.vMatrix * camera.invViewMatrix;
-            }
 
             cloudShadowUniformBuffer.SetData(&cloudShadowUniform, 0);
             cloudShadowUniformBuffer.Bind(commandList, 3, 5);

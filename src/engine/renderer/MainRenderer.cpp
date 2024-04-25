@@ -201,6 +201,40 @@ namespace Atlas {
 
                 Graphics::Profiler::EndQuery();
             }
+            {
+
+                {
+                    Graphics::Profiler::BeginQuery("Main");
+
+                    // We can't return here because of the queries
+                    if (device->swapChain->isComplete) {
+                        commandList->BeginRenderPass(device->swapChain, true);
+
+                        auto pipelineConfig = GetMainPipelineConfig();
+                        pipelineConfig.ManageMacro("FILMIC_TONEMAPPING", postProcessing.filmicTonemapping);
+                        pipelineConfig.ManageMacro("VIGNETTE", postProcessing.vignette.enable);
+                        pipelineConfig.ManageMacro("CHROMATIC_ABERRATION", postProcessing.chromaticAberration.enable);
+                        pipelineConfig.ManageMacro("FILM_GRAIN", postProcessing.filmGrain.enable);
+
+                        auto pipeline = PipelineManager::GetPipeline(pipelineConfig);
+                        commandList->BindPipeline(pipeline);
+
+                        SetUniforms(camera, scene);
+
+                        {
+                                target->radianceTexture.Bind(commandList, 3, 0);
+                        }
+                        commandList->BindBuffer(uniformBuffer, 3, 4);
+
+                        commandList->Draw(6, 1, 0, 0);
+
+                        commandList->EndRenderPass();
+                    }
+
+                    Graphics::Profiler::EndQuery();
+                }
+
+            }
 
             Graphics::Profiler::EndQuery();
             Graphics::Profiler::EndThread();

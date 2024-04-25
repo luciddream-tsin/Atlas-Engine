@@ -86,33 +86,11 @@ void main() {
 
     // Apply the tone mapping because we want the colors to be back in
     // normal range
-#ifdef HDR
-    // Note: Tuned these two eotfs to be perceptually the same. Not sure how it turns out.
-    // Haven't tested with Dolby Vision
-#ifdef HYBRID_LOG_GAMMA_EOTF
-    // Dark regions are getting crushed too much, correct for that
-    color = pow(color, vec3(0.9));
-    color = Rec709ToRec2020(color);
-    color.rgb = InverseHybridLogGammeEotf(color);
-#endif
+    // color = ToneMap(color);
 
-#ifdef PERCEPTUAL_QUANTIZER_EOTF
-    color = Rec709ToRec2020(color);
-    color = InversePerceptualQuantizerEotf(color);
-#endif
-    
-#else
+    // color = clamp(saturate(color, Uniforms.saturation), vec3(0.0), vec3(1.0));
 
-    color = ToneMap(color);
-
-#ifdef GAMMA_CORRECTION
-    color = pow(color, vec3(gamma));
-#endif
-#endif
-
-    color = clamp(saturate(color, Uniforms.saturation), vec3(0.0), vec3(1.0));
-
-    color = ((color - 0.5) * max(Uniforms.contrast, 0.0)) + 0.5;
+    // color = ((color - 0.5) * max(Uniforms.contrast, 0.0)) + 0.5;
 
 
     outColor = vec4(color, 1.0);

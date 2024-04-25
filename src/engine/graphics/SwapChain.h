@@ -74,7 +74,7 @@ namespace Atlas {
 
             VkRenderPass renderPass;
 
-            VkClearValue colorClearValue = { .color = { { 1.0f, 1.0f, 1.0f, 1.0f } } };
+            VkClearValue colorClearValue = { .color = { { 1.0f, .0f, 1.0f, 1.0f } } };
             VkClearValue depthClearValue = { .depthStencil = { .depth = 1.0f } };
 
             bool isComplete = false;

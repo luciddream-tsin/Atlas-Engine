@@ -77,59 +77,13 @@ void main() {
     vec2 texCoord = 0.5 * positionVS + 0.5;
     vec3 color = vec3(0.0);
     
-#ifdef CHROMATIC_ABERRATION
-    vec2 uvRedChannel = (positionVS - positionVS * 0.005f * Uniforms.aberrationStrength
-        * Uniforms.aberrationReversed) * 0.5f + 0.5f;
-    vec2 uvGreenChannel = (positionVS - positionVS * 0.0025f * Uniforms.aberrationStrength) * 0.5f + 0.5f;
-    vec2 uvBlueChannel =  (positionVS - positionVS * 0.005f * Uniforms.aberrationStrength
-        * (1.0f - Uniforms.aberrationReversed)) * 0.5f + 0.5f;
-    
-    color.r = texture(hdrTexture, uvRedChannel).r;
-    color.g = texture(hdrTexture, uvGreenChannel).g;
-    color.b = texture(hdrTexture, uvBlueChannel).b;
-    
-#ifdef BLOOM
-    // We want to keep a constant expression in texture[const]
-    // because OpenGL ES doesn't support dynamic texture fetches
-    // inside a loop
-    if (Uniforms.bloomPasses > 0) {
-        color.r += texture(bloomFirstTexture, uvRedChannel).r;
-        color.g += texture(bloomFirstTexture, uvGreenChannel).g;
-        color.b += texture(bloomFirstTexture, uvBlueChannel).b;
-    }
-    if (Uniforms.bloomPasses > 1) {
-        color.r += texture(bloomSecondTexture, uvRedChannel).r;
-        color.g += texture(bloomSecondTexture, uvGreenChannel).g;
-        color.b += texture(bloomSecondTexture, uvBlueChannel).b;
-    }
-    if (Uniforms.bloomPasses > 2) {
-        color.r += texture(bloomThirdTexture, uvRedChannel).r;
-        color.g += texture(bloomThirdTexture, uvGreenChannel).g;
-        color.b += texture(bloomThirdTexture, uvBlueChannel).b;
-    }
-#endif
-#else
+
     color = texture(hdrTexture, texCoord).rgb;
-#ifdef BLOOM
-    if (Uniforms.bloomPasses > 0) {
-        color += texture(bloomFirstTexture, texCoord).rgb;
-    }
-    if (Uniforms.bloomPasses > 1) {
-        color += texture(bloomSecondTexture, texCoord).rgb;
-    }
-    if (Uniforms.bloomPasses > 2) {
-        color += texture(bloomThirdTexture, texCoord).rgb;
-    }
-#endif
-#endif
 
-    color *= Uniforms.exposure;
 
-#ifdef FILM_GRAIN
-    color = color + color * Uniforms.filmGrainStrength * (2.0 * random(vec3(texCoord * 1000.0, globalData.time)) - 1.0);
-    color = max(color, vec3(0.0));
-#endif
-    
+    // color *= Uniforms.exposure;
+
+
     // Apply the tone mapping because we want the colors to be back in
     // normal range
 #ifdef HDR
@@ -148,11 +102,8 @@ void main() {
 #endif
     
 #else
-#ifdef FILMIC_TONEMAPPING
-    color = ACESToneMap(color);
-#else
+
     color = ToneMap(color);
-#endif
 
 #ifdef GAMMA_CORRECTION
     color = pow(color, vec3(gamma));
@@ -163,12 +114,6 @@ void main() {
 
     color = ((color - 0.5) * max(Uniforms.contrast, 0.0)) + 0.5;
 
-#ifdef VIGNETTE    
-    float vignetteFactor = max(1.0 - max(pow(length(fPosition) - Uniforms.vignetteOffset,
-        Uniforms.vignettePower), 0.0) * Uniforms.vignetteStrength, 0.0);
-    
-    color = mix(Uniforms.vignetteColor.rgb, color, Uniforms.vignetteFactor);
-#endif
 
     outColor = vec4(color, 1.0);
     

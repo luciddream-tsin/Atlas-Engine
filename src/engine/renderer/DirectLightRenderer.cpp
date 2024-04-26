@@ -88,8 +88,8 @@ namespace Atlas {
 
             uniformBuffer.SetData(&uniforms, 0);
 
-            pipelineConfig.ManageMacro("SCREEN_SPACE_SHADOWS", false);
-            pipelineConfig.ManageMacro("CLOUD_SHADOWS", false);
+            // pipelineConfig.ManageMacro("SCREEN_SPACE_SHADOWS", false);
+            // pipelineConfig.ManageMacro("CLOUD_SHADOWS", false);
             auto pipeline = PipelineManager::GetPipeline(pipelineConfig);
             commandList->BindPipeline(pipeline);
 

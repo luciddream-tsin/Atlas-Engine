@@ -133,8 +133,6 @@ namespace Atlas {
             Ref<Graphics::DescriptorSetLayout> globalDescriptorSetLayout;
             Ref<Graphics::Sampler> globalSampler;
 
-            Buffer::VertexArray vertexArray;
-            Buffer::VertexArray cubeVertexArray;
 
             OpaqueRenderer opaqueRenderer;
             ShadowRenderer shadowRenderer;

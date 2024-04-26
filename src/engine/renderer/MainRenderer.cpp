@@ -24,11 +24,7 @@ namespace Atlas {
 
             CreateGlobalDescriptorSetLayout();
 
-            Helper::GeometryHelper::GenerateRectangleVertexArray(vertexArray);
-            Helper::GeometryHelper::GenerateCubeVertexArray(cubeVertexArray);
-
-
-            PreintegrateBRDF();
+            // PreintegrateBRDF();
 
             auto uniformBufferDesc = Graphics::BufferDesc {
                     .usageFlags = VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,

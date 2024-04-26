@@ -37,7 +37,7 @@ namespace Atlas {
 
             opaqueRenderer.Init(device);
             shadowRenderer.Init(device);
-            downscaleRenderer.Init(device);
+            // downscaleRenderer.Init(device);
             // sssRenderer.Init(device);
             directLightRenderer.Init(device);
 
@@ -163,7 +163,7 @@ namespace Atlas {
             }
 
 
-            downscaleRenderer.Downscale(target, commandList);
+            // downscaleRenderer.Downscale(target, commandList);
             // sssRenderer.Render(target, scene, commandList);
 
             {

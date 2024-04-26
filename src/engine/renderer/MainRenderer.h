@@ -138,8 +138,8 @@ namespace Atlas {
             ShadowRenderer shadowRenderer;
             DirectLightRenderer directLightRenderer;
 
-            GBufferDownscaleRenderer downscaleRenderer;
-            SSSRenderer sssRenderer;
+            // GBufferDownscaleRenderer downscaleRenderer;
+            // SSSRenderer sssRenderer;
 
             RenderList renderList;
 

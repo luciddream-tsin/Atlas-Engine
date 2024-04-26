@@ -38,7 +38,7 @@ namespace Atlas {
             opaqueRenderer.Init(device);
             shadowRenderer.Init(device);
             downscaleRenderer.Init(device);
-            sssRenderer.Init(device);
+            // sssRenderer.Init(device);
             directLightRenderer.Init(device);
 
             textRenderer.Init(device);
@@ -164,7 +164,7 @@ namespace Atlas {
 
 
             downscaleRenderer.Downscale(target, commandList);
-            sssRenderer.Render(target, scene, commandList);
+            // sssRenderer.Render(target, scene, commandList);
 
             {
                 Graphics::Profiler::BeginQuery("Lighting pass");
@@ -188,7 +188,6 @@ namespace Atlas {
             }
             {
 
-                // target->Swap();
                 {
                     Graphics::Profiler::BeginQuery("Main");
 
@@ -219,7 +218,6 @@ namespace Atlas {
                         {
                             target->lightingTexture.Bind(commandList, 3, 0);
                         }
-                        //commandList->BindBuffer(uniformBuffer, 3, 4);
 
                         commandList->Draw(6, 1, 0, 0);
 

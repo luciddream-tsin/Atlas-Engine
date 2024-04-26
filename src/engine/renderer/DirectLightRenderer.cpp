@@ -14,7 +14,6 @@ namespace Atlas {
                 .size = sizeof(Uniforms)
             };
             uniformBuffer = Buffer::UniformBuffer(sizeof(Uniforms));
-            cloudShadowUniformBuffer = Buffer::UniformBuffer(sizeof(CloudShadow));
 
             pipelineConfig = PipelineConfig("deferred/direct.csh");
 
@@ -89,7 +88,7 @@ namespace Atlas {
 
             uniformBuffer.SetData(&uniforms, 0);
 
-            pipelineConfig.ManageMacro("SCREEN_SPACE_SHADOWS", sss && sss->enable);
+            pipelineConfig.ManageMacro("SCREEN_SPACE_SHADOWS", false);
             pipelineConfig.ManageMacro("CLOUD_SHADOWS", false);
             auto pipeline = PipelineManager::GetPipeline(pipelineConfig);
             commandList->BindPipeline(pipeline);
@@ -100,12 +99,6 @@ namespace Atlas {
             if (sss && sss->enable) {
                 commandList->BindImage(target->sssTexture.image, target->sssTexture.sampler, 3, 2);
             }
-
-            CloudShadow cloudShadowUniform;
-
-
-            cloudShadowUniformBuffer.SetData(&cloudShadowUniform, 0);
-            cloudShadowUniformBuffer.Bind(commandList, 3, 5);
 
             ivec2 res = ivec2(target->GetWidth(), target->GetHeight());
             int32_t groupSize = 8;

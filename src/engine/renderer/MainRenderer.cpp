@@ -34,7 +34,6 @@ namespace Atlas {
             };
             globalUniformBuffer = device->CreateMultiBuffer(uniformBufferDesc);
 
-            uniformBufferDesc.size = sizeof(DDGIUniforms);
 
             opaqueRenderer.Init(device);
             shadowRenderer.Init(device);

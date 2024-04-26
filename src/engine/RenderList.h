@@ -64,11 +64,9 @@ namespace Atlas {
 
         std::vector<mat3x4> currentEntityMatrices;
         std::vector<mat3x4> lastEntityMatrices;
-        std::vector<mat3x4> impostorMatrices;
 
         Ref<Graphics::MultiBuffer> currentMatricesBuffer;
         Ref<Graphics::MultiBuffer> lastMatricesBuffer;
-        Ref<Graphics::MultiBuffer> impostorMatricesBuffer;
 
         std::vector<Pass> passes;
 

@@ -141,13 +141,11 @@ namespace Atlas {
             DirectLightRenderer directLightRenderer;
 
             GBufferDownscaleRenderer downscaleRenderer;
-            AORenderer aoRenderer;
             SSSRenderer sssRenderer;
 
             RenderList renderList;
 
             std::vector<vec2> haltonSequence;
-            size_t haltonIndex = 0;
             uint32_t frameCount = 0;
 
         };

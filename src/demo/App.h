@@ -91,8 +91,8 @@ private:
     float rotateCameraSpeed = 0.01f;
     float moveCameraSpeed = 0.1f;
 
-    int32_t windowWidth = 1920;
-    int32_t windowHeight = 1080;
+    int32_t windowWidth = 520;
+    int32_t windowHeight = 480;
 
     float cameraSpeed = 7.0f;
 

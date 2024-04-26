@@ -27,7 +27,6 @@ namespace Atlas {
             Helper::GeometryHelper::GenerateRectangleVertexArray(vertexArray);
             Helper::GeometryHelper::GenerateCubeVertexArray(cubeVertexArray);
 
-            haltonSequence = Helper::HaltonSequence::Generate(2, 3, 16 + 1);
 
             PreintegrateBRDF();
 
@@ -44,7 +43,6 @@ namespace Atlas {
             opaqueRenderer.Init(device);
             shadowRenderer.Init(device);
             downscaleRenderer.Init(device);
-            aoRenderer.Init(device);
             sssRenderer.Init(device);
             directLightRenderer.Init(device);
 
@@ -76,18 +74,12 @@ namespace Atlas {
 
             PrepareMaterials(scene, materials, materialMap);
 
-            std::vector<Ref<Graphics::Image>> images;
-            std::vector<Ref<Graphics::Buffer>> blasBuffers, triangleBuffers, bvhTriangleBuffers, triangleOffsetBuffers;
-            PrepareBindlessData(scene, images, blasBuffers, triangleBuffers, bvhTriangleBuffers, triangleOffsetBuffers);
-
             SetUniforms(scene, camera);
 
             commandList->BindBuffer(globalUniformBuffer, 1, 31);
             commandList->BindImage(dfgPreintegrationTexture.image, dfgPreintegrationTexture.sampler, 1, 12);
             commandList->BindSampler(globalSampler, 1, 13);
-            commandList->BindBuffers(triangleBuffers, 0, 1);
-            if (images.size())
-                commandList->BindSampledImages(images, 0, 3);
+
 
             auto materialBufferDesc = Graphics::BufferDesc {
                     .usageFlags = VK_BUFFER_USAGE_STORAGE_BUFFER_BIT,
@@ -102,7 +94,6 @@ namespace Atlas {
             // Bind before any shadows etc. are rendered, this is a shared buffer for all these passes
             commandList->BindBuffer(renderList.currentMatricesBuffer, 1, 1);
             commandList->BindBuffer(renderList.lastMatricesBuffer, 1, 2);
-            commandList->BindBuffer(renderList.impostorMatricesBuffer, 1, 3);
 
 
             {
@@ -178,7 +169,6 @@ namespace Atlas {
 
 
             downscaleRenderer.Downscale(target, commandList);
-            aoRenderer.Render(target, scene, commandList);
             sssRenderer.Render(target, scene, commandList);
 
             {
@@ -203,7 +193,7 @@ namespace Atlas {
             }
             {
 
-                target->Swap();
+                // target->Swap();
                 {
                     Graphics::Profiler::BeginQuery("Main");
 
@@ -243,7 +233,6 @@ namespace Atlas {
 
                     Graphics::Profiler::EndQuery();
                 }
-
             }
 
             Graphics::Profiler::EndQuery();
@@ -258,7 +247,6 @@ namespace Atlas {
 
             textRenderer.Update();
 
-            haltonIndex = (haltonIndex + 1) % haltonSequence.size();
             frameCount++;
 
         }

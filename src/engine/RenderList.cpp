@@ -26,10 +26,6 @@ namespace Atlas {
         lastEntityMatrices.clear();
         if (lastSize) lastEntityMatrices.reserve(lastSize);
 
-        lastSize = impostorMatrices.size();
-        impostorMatrices.clear();
-        if (lastSize) impostorMatrices.reserve(lastSize);
-
         passes.clear();
 
     }
@@ -139,7 +135,6 @@ namespace Atlas {
             MeshInstances instances;
 
             instances.offset = currentEntityMatrices.size();
-            instances.impostorOffset = impostorMatrices.size();
 
             if (hasImpostor) {
                 for (auto ecsEntity : entities) {
@@ -159,9 +154,6 @@ namespace Atlas {
                             lastEntityMatrices.push_back(glm::transpose(transformComponent.globalMatrix));
                         }
                     }
-                    else {
-                        impostorMatrices.push_back(glm::transpose(transformComponent.globalMatrix));
-                    }
                 }
             }
             else {
@@ -180,7 +172,6 @@ namespace Atlas {
             }
 
             instances.count = currentEntityMatrices.size() - instances.offset;
-            instances.impostorCount = impostorMatrices.size() - instances.impostorOffset;
             meshToInstancesMap[meshId] = instances;
 
         }
@@ -204,25 +195,13 @@ namespace Atlas {
             if (newSize > 0) lastMatricesBuffer = device->CreateMultiBuffer(bufferDesc);
         }
 
-        if (!impostorMatricesBuffer || impostorMatricesBuffer->size < sizeof(mat3x4) * impostorMatrices.size()) {
-            auto newSize = impostorMatricesBuffer != nullptr ? impostorMatricesBuffer->size * 2 :
-                           sizeof(mat3x4) * impostorMatrices.size();
-            newSize = std::max(std::max(newSize, size_t(1)), sizeof(mat3x4) * impostorMatrices.size());
-            auto bufferDesc = Graphics::BufferDesc {
-                .usageFlags = VK_BUFFER_USAGE_STORAGE_BUFFER_BIT,
-                .domain = Graphics::BufferDomain::Host,
-                .size = newSize
-            };
-            if (newSize > 0) impostorMatricesBuffer = device->CreateMultiBuffer(bufferDesc);
-        }
+
 
         // Probably better to use a device local buffer since we upload once per frame
         if (currentEntityMatrices.size() > 0)
             currentMatricesBuffer->SetData(currentEntityMatrices.data(), 0, currentEntityMatrices.size() * sizeof(mat3x4));
         if (lastEntityMatrices.size() > 0)
             lastMatricesBuffer->SetData(lastEntityMatrices.data(), 0, lastEntityMatrices.size() * sizeof(mat3x4));
-        if (impostorMatrices.size() > 0)
-            impostorMatricesBuffer->SetData(impostorMatrices.data(), 0, impostorMatrices.size() * sizeof(mat3x4));
 
     }
 

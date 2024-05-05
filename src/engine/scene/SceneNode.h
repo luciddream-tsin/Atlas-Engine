@@ -18,7 +18,7 @@ namespace Atlas {
 
         struct RegisteredMesh {
             ResourceHandle<Mesh::Mesh> mesh;
-            int32_t actorCount;
+            int32_t actorCount{};
         };
 
         class SceneNode {

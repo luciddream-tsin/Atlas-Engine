@@ -501,6 +501,7 @@ namespace Atlas {
                     VK_CHECK(result)
                 }
             }
+            frame->WaitAndReset(device);
 
             // Delete data that is marked for deletion for this frame
             memoryManager->DeleteData();
@@ -529,8 +530,6 @@ namespace Atlas {
                 CreateSwapChain(swapChain->presentMode, swapChain->colorSpace);
             }
 
-            // Wait, reset and start with new semaphores
-            nextFrame->WaitAndReset(device);
 
         }
 

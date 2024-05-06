@@ -501,7 +501,6 @@ namespace Atlas {
                     VK_CHECK(result)
                 }
             }
-            frame->WaitAndReset(device);
 
             // Delete data that is marked for deletion for this frame
             memoryManager->DeleteData();
@@ -521,6 +520,8 @@ namespace Atlas {
             }
 
             auto nextFrame = GetFrameData();
+            nextFrame->WaitAndReset(device);
+
             if (swapChain->AcquireImageIndex(nextFrame->semaphore)) {
                 recreateSwapChain = true;
             }

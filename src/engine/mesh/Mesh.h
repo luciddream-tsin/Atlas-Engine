@@ -35,7 +35,6 @@ namespace Atlas {
 
         class Mesh {
 
-            friend Scene::RTData;
 
         public:
             Mesh() = default;
@@ -62,13 +61,7 @@ namespace Atlas {
              */
             void UpdateVertexArray();
 
-            /**
-             * Builds up BVH and fills raytracing related buffers
-             */
-            void BuildBVH(bool parallelBuild = true);
 
-
-            bool IsBVHBuilt() const;
 
             std::string name = "";
 
@@ -85,14 +78,9 @@ namespace Atlas {
             Buffer::VertexBuffer tangentBuffer;
             Buffer::VertexBuffer colorBuffer;
 
-            Buffer::Buffer blasNodeBuffer;
             Buffer::Buffer triangleBuffer;
-            Buffer::Buffer bvhTriangleBuffer;
             Buffer::Buffer triangleOffsetBuffer;
 
-            Ref<Graphics::BLAS> blas = nullptr;
-
-            Ref<Impostor> impostor = nullptr;
 
             bool cullBackFaces = true;
             bool depthTest = true;
@@ -102,16 +90,10 @@ namespace Atlas {
 
             int32_t allowedShadowCascades = 6;
 
-            float impostorDistance = 300.0f;
-            float impostorShadowDistance = 100.0f;
-
             bool invertUVs = false;
 
         private:
             bool isLoaded = false;
-
-            std::atomic_bool isBvhBuilt = false;
-            std::atomic_bool needsBvhRefresh = false;
 
         };
 

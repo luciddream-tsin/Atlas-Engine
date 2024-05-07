@@ -86,25 +86,14 @@ namespace Atlas {
             PrepareMaterials(scene, materials, materialMap);
 
             std::vector<Ref<Graphics::Image>> images;
-            std::vector<Ref<Graphics::Buffer>> blasBuffers, triangleBuffers, bvhTriangleBuffers, triangleOffsetBuffers;
-            PrepareBindlessData(scene, images, blasBuffers, triangleBuffers, bvhTriangleBuffers, triangleOffsetBuffers);
 
             SetUniforms(scene, camera);
 
             commandList->BindBuffer(globalUniformBuffer, 0, 3);
-            commandList->BindImage(dfgPreintegrationTexture.image, dfgPreintegrationTexture.sampler, 1, 12);
             commandList->BindSampler(globalSampler, 1, 13);
-            commandList->BindBuffers(triangleBuffers, 0, 1);
+
             if (images.size())
                 commandList->BindSampledImages(images, 0, 4);
-
-            if (device->support.hardwareRayTracing) {
-                commandList->BindBuffers(triangleOffsetBuffers, 0, 2);
-            }
-            else {
-                commandList->BindBuffers(blasBuffers, 0, 0);
-                commandList->BindBuffers(bvhTriangleBuffers, 0, 2);
-            }
 
             auto materialBufferDesc = Graphics::BufferDesc {
                 .usageFlags = VK_BUFFER_USAGE_STORAGE_BUFFER_BIT,
@@ -126,13 +115,9 @@ namespace Atlas {
             // Bind before any shadows etc. are rendered, this is a shared buffer for all these passes
             commandList->BindBuffer(renderList.currentMatricesBuffer, 1, 1);
             commandList->BindBuffer(renderList.lastMatricesBuffer, 1, 2);
-            commandList->BindBuffer(renderList.impostorMatricesBuffer, 1, 3);
-
-
 
             {
                 shadowRenderer.Render(viewport, target, camera, scene, commandList, &renderList);
-
             }
 
             if (scene->sky.GetProbe()) {
@@ -791,21 +776,6 @@ namespace Atlas {
 
             globalUniformBuffer->SetData(&globalUniforms, 0, sizeof(GlobalUniforms));
 
-            auto meshes = scene->GetMeshes();
-            for (auto& mesh : meshes) {
-                if (!mesh.IsLoaded() || !mesh->impostor) continue;
-
-                auto impostor = mesh->impostor;
-                Mesh::Impostor::ImpostorInfo impostorInfo = {
-                    .center = vec4(impostor->center, 1.0f),
-                    .radius = impostor->radius,
-                    .views = impostor->views,
-                    .cutoff = impostor->cutoff,
-                    .mipBias = impostor->mipBias
-                };
-
-                impostor->impostorInfoBuffer.SetData(&impostorInfo, 0);
-            }
 
         }
 
@@ -860,95 +830,8 @@ namespace Atlas {
                 materialMap[material] = idx++;
             }
             
-            auto meshes = scene->GetMeshes();
-
-            for (auto mesh : meshes) {
-                if (!mesh.IsLoaded())
-                    continue;
-
-                auto impostor = mesh->impostor;
-
-                if (!impostor)
-                    continue;
-
-                PackedMaterial packed;
-
-                packed.baseColor = Common::Packing::PackUnsignedVector3x10_1x2(vec4(1.0f));
-                packed.emissiveColor = Common::Packing::PackUnsignedVector3x10_1x2(vec4(0.0f));
-                packed.transmissionColor = Common::Packing::PackUnsignedVector3x10_1x2(vec4(Common::ColorConverter::ConvertSRGBToLinear(impostor->transmissiveColor), 1.0f));
-
-                vec4 data0, data1, data2;
-
-                data0.x = 1.0f;
-                data0.y = 1.0f;
-                data0.z = 1.0f;
-
-                data1.x = 1.0f;
-                data1.y = 0.0f;
-                data1.z = 0.0f;
-
-                data2.x = 0.5f;
-                // Note used
-                data2.y = 0.0f;
-                data2.z = 0.0f;
-
-                packed.data0 = Common::Packing::PackUnsignedVector3x10_1x2(data0);
-                packed.data1 = Common::Packing::PackUnsignedVector3x10_1x2(data1);
-                packed.data2 = Common::Packing::PackUnsignedVector3x10_1x2(data2);
-
-                packed.features = 0;
-
-                packed.features |= FEATURE_BASE_COLOR_MAP | 
-                    FEATURE_ROUGHNESS_MAP | FEATURE_METALNESS_MAP | FEATURE_AO_MAP;
-                packed.features |= glm::length(impostor->transmissiveColor) > 0.0f ? FEATURE_TRANSMISSION : 0;
-
-                materials.push_back(packed);
-
-                materialMap[impostor.get()] =  idx++;
-            }
-
-
         }
 
-        void MainRenderer::PrepareBindlessData(Scene::Scene* scene, std::vector<Ref<Graphics::Image>>& images,
-            std::vector<Ref<Graphics::Buffer>>& blasBuffers, std::vector<Ref<Graphics::Buffer>>& triangleBuffers,
-            std::vector<Ref<Graphics::Buffer>>& bvhTriangleBuffers, std::vector<Ref<Graphics::Buffer>>& triangleOffsetBuffers) {
-
-            if (!device->support.bindless)
-                return;
-
-            blasBuffers.resize(scene->meshIdToBindlessIdx.size());
-            triangleBuffers.resize(scene->meshIdToBindlessIdx.size());
-            bvhTriangleBuffers.resize(scene->meshIdToBindlessIdx.size());
-            triangleOffsetBuffers.resize(scene->meshIdToBindlessIdx.size());
-
-            for (const auto& [meshId, idx] : scene->meshIdToBindlessIdx) {
-                if (!scene->rootMeshMap.contains(meshId)) continue;
-
-                const auto& mesh = scene->rootMeshMap[meshId].mesh;
-
-                auto blasBuffer = mesh->blasNodeBuffer.Get();
-                auto triangleBuffer = mesh->triangleBuffer.Get();
-                auto bvhTriangleBuffer = mesh->bvhTriangleBuffer.Get();
-                auto triangleOffsetBuffer = mesh->triangleOffsetBuffer.Get();
-
-                AE_ASSERT(triangleBuffer != nullptr);
-
-                blasBuffers[idx] = blasBuffer;
-                triangleBuffers[idx] = triangleBuffer;
-                bvhTriangleBuffers[idx] = bvhTriangleBuffer;
-                triangleOffsetBuffers[idx] = triangleOffsetBuffer;
-            }
-
-            images.resize(scene->textureToBindlessIdx.size());
-
-            for (const auto& [texture, idx] : scene->textureToBindlessIdx) {
-
-                images[idx] = texture->image;
-
-            }
-
-        }
 
         void MainRenderer::FillRenderList(Scene::Scene *scene, Atlas::Camera *camera) {
 

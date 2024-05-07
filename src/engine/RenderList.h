@@ -19,8 +19,6 @@ namespace Atlas {
             size_t offset;
             size_t count;
 
-            size_t impostorOffset;
-            size_t impostorCount;
         };
 
         enum class RenderPassType {
@@ -59,11 +57,9 @@ namespace Atlas {
 
         std::vector<mat3x4> currentActorMatrices;
         std::vector<mat3x4> lastActorMatrices;
-        std::vector<mat3x4> impostorMatrices;
 
         Ref<Graphics::MultiBuffer> currentMatricesBuffer;
         Ref<Graphics::MultiBuffer> lastMatricesBuffer;
-        Ref<Graphics::MultiBuffer> impostorMatricesBuffer;
 
         std::vector<Pass> passes;
 

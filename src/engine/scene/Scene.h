@@ -17,8 +17,6 @@
 #include "../Decal.h"
 
 #include "SceneNode.h"
-#include "RTData.h"
-#include "Vegetation.h"
 
 #include <unordered_map>
 

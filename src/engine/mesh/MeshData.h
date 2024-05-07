@@ -82,16 +82,7 @@ namespace Atlas {
              */
             void SetTransform(mat4 transform);
 
-            /**
-             * Builds a blas from the data
-             */
-            void BuildBVH(bool parallelBuild);
 
-            /**
-             *
-             * @return
-             */
-            bool IsBVHBuilt();
 
             std::string filename;
 
@@ -118,9 +109,6 @@ namespace Atlas {
             int32_t indexCount = 0;
             int32_t vertexCount = 0;
 
-            std::vector<GPUTriangle> gpuTriangles;
-            std::vector<GPUBVHTriangle> gpuBvhTriangles;
-            std::vector<GPUBVHNode> gpuBvhNodes;
 
         };
 

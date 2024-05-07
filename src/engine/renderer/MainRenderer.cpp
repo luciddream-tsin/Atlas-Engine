@@ -97,12 +97,6 @@ namespace Atlas {
             auto materialBuffer = device->CreateBuffer(materialBufferDesc);
             commandList->BindBuffer(materialBuffer, 1, 14);
 
-            if (scene->sky.probe) {
-                if (scene->sky.probe->update) {
-                    FilterProbe(scene->sky.probe.get(), commandList);
-                    //scene->sky.probe->update = false;
-                }
-            }
 
             // Bind before any shadows etc. are rendered, this is a shared buffer for all these passes
             commandList->BindBuffer(renderList.currentMatricesBuffer, 1, 1);

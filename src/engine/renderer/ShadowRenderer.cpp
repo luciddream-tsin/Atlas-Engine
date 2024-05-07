@@ -13,12 +13,11 @@ namespace Atlas {
 
             this->device = device;
 
-            impostorRenderer.Init(device);
 
         }
 
         void ShadowRenderer::Render(Viewport* viewport, RenderTarget* target, Camera* camera,
-            Scene::Scene* scene, Graphics::CommandList* commandList, RenderList* renderList) {
+                                    Scene::Scene* scene, Graphics::CommandList* commandList, RenderList* renderList) {
 
             Graphics::Profiler::BeginQuery("Shadows");
 
@@ -106,10 +105,10 @@ namespace Atlas {
 
                     // Sort materials by hash
                     std::sort(subDatas.begin(), subDatas.end(),
-                        [](auto subData0, auto subData1) {
-                            return subData0.first->material->shadowConfig.variantHash <
-                                   subData1.first->material->shadowConfig.variantHash;
-                        });
+                              [](auto subData0, auto subData1) {
+                                  return subData0.first->material->shadowConfig.variantHash <
+                                         subData1.first->material->shadowConfig.variantHash;
+                              });
 
                     size_t prevHash = 0;
                     Ref<Graphics::Pipeline> currentPipeline = nullptr;
@@ -133,20 +132,17 @@ namespace Atlas {
                             commandList->BindImage(material->opacityMap->image, material->opacityMap->sampler, 3, 0);
 
                         auto pushConstants = PushConstants {
-                            .lightSpaceMatrix = lightSpaceMatrix,
-                            .vegetation = mesh->vegetation ? 1u : 0u,
-                            .invertUVs = mesh->invertUVs ? 1u : 0u
+                                .lightSpaceMatrix = lightSpaceMatrix,
+                                .vegetation = mesh->vegetation ? 1u : 0u,
+                                .invertUVs = mesh->invertUVs ? 1u : 0u
                         };
                         commandList->PushConstants("constants", &pushConstants);
 
                         if(!instance.count) continue;
                         commandList->DrawIndexed(subData->indicesCount, instance.count, subData->indicesOffset,
-                            0, instance.offset);
+                                                 0, instance.offset);
 
                     }
-
-                    impostorRenderer.Render(frameBuffer, renderList, commandList,
-                        shadowPass, component->viewMatrix, component->projectionMatrix, lightLocation);
 
                     commandList->EndRenderPass();
 
@@ -173,38 +169,38 @@ namespace Atlas {
             }
 
             Graphics::RenderPassDepthAttachment attachment = {
-                .imageFormat = shadow->useCubemap ? shadow->cubemap.format :
-                               shadow->maps.format,
-                .loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR,
-                .initialLayout = VK_IMAGE_LAYOUT_UNDEFINED,
-                .outputLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
+                    .imageFormat = shadow->useCubemap ? shadow->cubemap.format :
+                                   shadow->maps.format,
+                    .loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR,
+                    .initialLayout = VK_IMAGE_LAYOUT_UNDEFINED,
+                    .outputLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
             };
             Graphics::RenderPassDesc renderPassDesc = {
-                .depthAttachment = { attachment }
+                    .depthAttachment = { attachment }
             };
             auto renderPass = device->CreateRenderPass(renderPassDesc);
 
             Graphics::FrameBufferDesc frameBufferDesc = {
-                .renderPass = renderPass,
-                .depthAttachment = { shadow->useCubemap ? shadow->cubemap.image : shadow->maps.image, 0, true},
-                .extent = { uint32_t(shadow->resolution), uint32_t(shadow->resolution) }
+                    .renderPass = renderPass,
+                    .depthAttachment = { shadow->useCubemap ? shadow->cubemap.image : shadow->maps.image, 0, true},
+                    .extent = { uint32_t(shadow->resolution), uint32_t(shadow->resolution) }
             };
             return device->CreateFrameBuffer(frameBufferDesc);
 
         }
 
         PipelineConfig ShadowRenderer::GetPipelineConfigForSubData(Mesh::MeshSubData *subData,
-            ResourceHandle<Mesh::Mesh>& mesh, Ref<Graphics::FrameBuffer>& frameBuffer) {
+                                                                   ResourceHandle<Mesh::Mesh>& mesh, Ref<Graphics::FrameBuffer>& frameBuffer) {
 
             auto material = subData->material;
 
             auto shaderConfig = ShaderConfig {
-                {"shadowMapping.vsh", VK_SHADER_STAGE_VERTEX_BIT},
-                {"shadowMapping.fsh", VK_SHADER_STAGE_FRAGMENT_BIT},
+                    {"shadowMapping.vsh", VK_SHADER_STAGE_VERTEX_BIT},
+                    {"shadowMapping.fsh", VK_SHADER_STAGE_FRAGMENT_BIT},
             };
             auto pipelineDesc = Graphics::GraphicsPipelineDesc {
-                .frameBuffer = frameBuffer,
-                .vertexInputInfo = mesh->vertexArray.GetVertexInputState(),
+                    .frameBuffer = frameBuffer,
+                    .vertexInputInfo = mesh->vertexArray.GetVertexInputState(),
             };
 
             if (material->twoSided || !mesh->cullBackFaces) {

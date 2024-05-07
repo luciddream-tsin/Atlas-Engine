@@ -6,32 +6,13 @@
 #include "RenderBatch.h"
 
 #include "OpaqueRenderer.h"
-#include "ImpostorRenderer.h"
-#include "TerrainRenderer.h"
-#include "OceanRenderer.h"
 #include "ShadowRenderer.h"
-#include "ImpostorShadowRenderer.h"
-#include "TerrainShadowRenderer.h"
-#include "DecalRenderer.h"
 #include "DirectLightRenderer.h"
 #include "PointLightRenderer.h"
-#include "IndirectLightRenderer.h"
-#include "TemporalAARenderer.h"
-#include "SkyboxRenderer.h"
-#include "AtmosphereRenderer.h"
-#include "PostProcessRenderer.h"
-#include "GBufferDownscaleRenderer.h"
+
 #include "TextRenderer.h"
-#include "GIRenderer.h"
-#include "DDGIRenderer.h"
-#include "AORenderer.h"
-#include "RTReflectionRenderer.h"
-#include "SSSRenderer.h"
-#include "VolumetricRenderer.h"
-#include "VolumetricCloudRenderer.h"
-#include "VegetationRenderer.h"
+
 #include "TextureRenderer.h"
-#include "PathTracingRenderer.h"
 
 namespace Atlas {
 
@@ -55,15 +36,6 @@ namespace Atlas {
                 Scene::Scene* scene, Texture::Texture2D* texture = nullptr, 
                 RenderBatch* batch = nullptr);
 
-            /**
-             *
-             * @param window
-             * @param target
-             * @param camera
-             * @param scene
-             */
-            void PathTraceScene(Viewport* viewport, PathTracerRenderTarget* target, Camera* camera,
-                Scene::Scene* scene, Texture::Texture2D* texture = nullptr);
 
             /**
              *

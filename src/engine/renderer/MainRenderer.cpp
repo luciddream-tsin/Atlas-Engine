@@ -116,9 +116,6 @@ namespace Atlas {
             auto materialBuffer = device->CreateBuffer(materialBufferDesc);
             commandList->BindBuffer(materialBuffer, 1, 14);
 
-            if (scene->ocean && scene->ocean->enable)
-                scene->ocean->simulation.Compute(commandList);
-
             if (scene->sky.probe) {
                 if (scene->sky.probe->update) {
                     FilterProbe(scene->sky.probe.get(), commandList);
@@ -131,9 +128,7 @@ namespace Atlas {
             commandList->BindBuffer(renderList.lastMatricesBuffer, 1, 2);
             commandList->BindBuffer(renderList.impostorMatricesBuffer, 1, 3);
 
-            if (scene->irradianceVolume) {
-                commandList->BindBuffer(ddgiUniformBuffer, 2, 26);
-            }
+
 
             {
                 shadowRenderer.Render(viewport, target, camera, scene, commandList, &renderList);
@@ -321,96 +316,6 @@ namespace Atlas {
 
         }
 
-        void MainRenderer::PathTraceScene(Viewport *viewport, PathTracerRenderTarget *target, Camera *camera,
-            Scene::Scene *scene, Texture::Texture2D *texture) {
-
-            if (!scene->IsRtDataValid() || !device->swapChain->isComplete)
-                return;
-
-            static vec2 lastJitter = vec2(0.0f);
-
-            auto commandList = device->GetCommandList(Graphics::QueueType::GraphicsQueue);
-
-            auto jitter = 2.0f * haltonSequence[haltonIndex] - 1.0f;
-            jitter.x /= (float)target->GetWidth();
-            jitter.y /= (float)target->GetHeight();
-
-            camera->Jitter(jitter * 0.0f);
-
-            commandList->BeginCommands();
-
-            Graphics::Profiler::BeginThread("Path tracing", commandList);
-            Graphics::Profiler::BeginQuery("Buffer operations");
-
-            auto globalUniforms = GlobalUniforms{
-                 .vMatrix = camera->viewMatrix,
-                 .pMatrix = camera->projectionMatrix,
-                 .ivMatrix = camera->invViewMatrix,
-                 .ipMatrix = camera->invProjectionMatrix,
-                 .pvMatrixLast = camera->GetLastJitteredMatrix(),
-                 .pvMatrixCurrent = camera->projectionMatrix * camera->viewMatrix,
-                 .jitterLast = lastJitter,
-                 .jitterCurrent = jitter,
-                 .cameraLocation = vec4(camera->location, 0.0f),
-                 .cameraDirection = vec4(camera->direction, 0.0f),
-                 .cameraUp = vec4(camera->up, 0.0f),
-                 .cameraRight = vec4(camera->right, 0.0f),
-                 .planetCenter = vec4(scene->sky.planetCenter, 0.0f),
-                 .planetRadius = scene->sky.planetRadius,
-                 .time = Clock::Get(),
-                 .deltaTime = Clock::GetDelta(),
-                 .frameCount = frameCount
-            };
-
-            lastJitter = jitter;
-
-            pathTraceGlobalUniformBuffer->SetData(&globalUniforms, 0, sizeof(GlobalUniforms));
-
-            std::vector<Ref<Graphics::Image>> images;
-            std::vector<Ref<Graphics::Buffer>> blasBuffers, triangleBuffers, bvhTriangleBuffers, triangleOffsetBuffers;
-            PrepareBindlessData(scene, images, blasBuffers, triangleBuffers, bvhTriangleBuffers, triangleOffsetBuffers);
-
-            commandList->BindBuffer(pathTraceGlobalUniformBuffer, 0, 3);
-            commandList->BindImage(dfgPreintegrationTexture.image, dfgPreintegrationTexture.sampler, 1, 12);
-            commandList->BindSampler(globalSampler, 1, 13);
-            commandList->BindBuffers(triangleBuffers, 0, 1);
-            commandList->BindSampledImages(images, 0, 4);
-
-            if (device->support.hardwareRayTracing) {
-                commandList->BindBuffers(triangleOffsetBuffers, 0, 2);
-            }
-            else {
-                commandList->BindBuffers(blasBuffers, 0, 0);
-                commandList->BindBuffers(bvhTriangleBuffers, 0, 2);
-            }
-
-            Graphics::Profiler::EndQuery();
-
-
-
-            {
-                Graphics::Profiler::BeginQuery("Post processing");
-
-                if (device->swapChain->isComplete) {
-                    commandList->BeginRenderPass(device->swapChain, true);
-
-                    textureRenderer.RenderTexture2D(commandList, viewport, &target->texture,
-                        0.0f, 0.0f, float(viewport->width), float(viewport->height), 0.0f, 1.0f, false, true);
-
-                    commandList->EndRenderPass();
-                }
-
-                Graphics::Profiler::EndQuery();
-            }
-            
-
-            Graphics::Profiler::EndThread();
-
-            commandList->EndCommands();
-
-            device->SubmitCommandList(commandList);
-
-        }
 
         void MainRenderer::RenderRectangle(Viewport* viewport, vec4 color, float x, float y, float width, float height,
             bool alphaBlending) {
@@ -885,36 +790,6 @@ namespace Atlas {
             std::copy(frustumPlanes.begin(), frustumPlanes.end(), &globalUniforms.frustumPlanes[0]);
 
             globalUniformBuffer->SetData(&globalUniforms, 0, sizeof(GlobalUniforms));
-
-            if (scene->irradianceVolume) {
-                auto volume = scene->irradianceVolume;
-                auto ddgiUniforms = DDGIUniforms {
-                    .volumeMin = vec4(volume->aabb.min, 1.0f),
-                    .volumeMax = vec4(volume->aabb.max, 1.0f),
-                    .volumeProbeCount = ivec4(volume->probeCount, 0),
-                    .cellSize = vec4(volume->cellSize, 0.0f),
-                    .volumeBias = volume->bias,
-                    .volumeIrradianceRes = volume->irrRes,
-                    .volumeMomentsRes = volume->momRes,
-                    .rayCount = volume->rayCount,
-                    .inactiveRayCount = volume->rayCountInactive,
-                    .hysteresis = volume->hysteresis,
-                    .volumeGamma = volume->gamma,
-                    .volumeStrength = volume->strength,
-                    .depthSharpness = volume->sharpness,
-                    .optimizeProbes = volume->optimizeProbes ? 1 : 0,
-                    .volumeEnabled = volume->enable ? 1 : 0
-                };
-                ddgiUniformBuffer->SetData(&ddgiUniforms, 0, sizeof(DDGIUniforms));
-            }
-            else {
-                auto ddgiUniforms = DDGIUniforms {
-                    .volumeMin = vec4(0.0f),
-                    .volumeMax = vec4(0.0f),
-                    .volumeEnabled = 0
-                };
-                ddgiUniformBuffer->SetData(&ddgiUniforms, 0, sizeof(DDGIUniforms));
-            }
 
             auto meshes = scene->GetMeshes();
             for (auto& mesh : meshes) {

@@ -24,8 +24,6 @@ namespace Atlas {
                 SceneNode::operator=(that);
                 SpacePartitioning::operator=(that);
 
-                terrain = that.terrain;
-                ocean = that.ocean;
                 sky = that.sky;
                 postProcessing = that.postProcessing;
 
@@ -41,12 +39,7 @@ namespace Atlas {
 
             auto meshes = GetMeshes();
 
-            if (terrain) {
-                terrain->Update(camera);
-            }
 
-            if (ocean)
-                ocean->Update(camera, deltaTime);
 
             if (sky.sun) {
                 sky.sun->Update(camera);
@@ -95,23 +88,10 @@ namespace Atlas {
 
             std::vector<Material*> materials;
 
-            if (terrain) {
-                auto terrainMaterials = terrain->storage.GetMaterials();
 
-                for (auto material : terrainMaterials) {
-                    if (!material)
-                        continue;
-
-                    materials.push_back(material.get());
-                }
-                
-            }
 
             auto meshes = GetMeshes();
-            if (vegetation) {
-                auto vegMeshes = vegetation->GetMeshes();
-                meshes.insert(meshes.end(), vegMeshes.begin(), vegMeshes.end());
-            }
+
 
             for (auto mesh : meshes) {
                 if (!mesh.IsLoaded())

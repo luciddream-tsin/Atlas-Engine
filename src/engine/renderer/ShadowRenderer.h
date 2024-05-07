@@ -3,7 +3,6 @@
 #include "../System.h"
 #include "../RenderList.h"
 #include "Renderer.h"
-#include "ImpostorShadowRenderer.h"
 
 #include <mutex>
 #include <map>
@@ -38,7 +37,6 @@ namespace Atlas {
 
             LightMap lightMap;
 
-            ImpostorShadowRenderer impostorRenderer;
 
         };
 

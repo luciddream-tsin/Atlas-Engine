@@ -8,7 +8,6 @@
 #include <loader/ModelLoader.h>
 #include <ImguiExtension/ImguiWrapper.h>
 
-#include <renderer/PathTracingRenderer.h>
 
 #define WINDOW_FLAGS AE_WINDOW_RESIZABLE | AE_WINDOW_HIGH_DPI
 
@@ -57,7 +56,6 @@ private:
 
     SceneSelection sceneSelection = SPONZA;
 
-    Atlas::Renderer::PathTracerRenderTarget pathTraceTarget;
     Atlas::RenderTarget renderTarget;
     Atlas::Viewport viewport;
 

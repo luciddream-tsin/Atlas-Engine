@@ -11,7 +11,6 @@ const Atlas::EngineConfig Atlas::EngineInstance::engineConfig = {
 void App::LoadContent() {
 
     renderTarget = Atlas::RenderTarget(1920, 1080);
-    pathTraceTarget = Atlas::Renderer::PathTracerRenderTarget(1920, 1080);
 
     auto icon = Atlas::Texture::Texture2D("icon.png");
     window.SetIcon(&icon);
@@ -56,12 +55,6 @@ void App::LoadContent() {
 
     scene->sky.sun = directionalLight;
 
-    scene->ao = Atlas::CreateRef<Atlas::Lighting::AO>(16);
-    scene->ao->rt = true;
-    // Use SSGI by default
-    scene->ao->enable = false; 
-    scene->reflection = Atlas::CreateRef<Atlas::Lighting::Reflection>(1);
-    scene->reflection->useShadowMap = true;
 
     scene->fog = Atlas::CreateRef<Atlas::Lighting::Fog>();
     scene->fog->enable = true;
@@ -74,10 +67,6 @@ void App::LoadContent() {
     scene->postProcessing.taa = Atlas::PostProcessing::TAA(0.99f);
     scene->postProcessing.sharpen.enable = true;
     scene->postProcessing.sharpen.factor = 0.15f;
-
-    scene->sss = Atlas::CreateRef<Atlas::Lighting::SSS>();
-
-    scene->ssgi = Atlas::CreateRef<Atlas::Lighting::SSGI>();
 
     LoadScene();
 
@@ -181,11 +170,8 @@ void App::Render(float deltaTime) {
 
     if (animateLight) directionalLight->direction = glm::vec3(0.0f, -1.0f, sin(Atlas::Clock::Get() / 10.0f));
 
-    if (pathTrace) {
-        viewport.Set(0, 0, pathTraceTarget.GetWidth(), pathTraceTarget.GetHeight());
-        mainRenderer->PathTraceScene(&viewport, &pathTraceTarget, &camera, scene.get());
-    }
-    else {
+
+    {
         mainRenderer->RenderScene(&viewport, &renderTarget, &camera, scene.get());
 
         auto debug = debugAo || debugReflection || debugClouds || debugSSS || debugSSGI || debugMotion;
@@ -236,13 +222,8 @@ void App::Render(float deltaTime) {
         ImGui::NewFrame();
 
         const auto& light = directionalLight;
-        const auto& volume = scene->irradianceVolume;
-        const auto& ao = scene->ao;
         const auto& fog = scene->fog;
-        const auto& reflection = scene->reflection;
         const auto& clouds = scene->sky.clouds;
-        const auto& sss = scene->sss;
-        const auto& ssgi = scene->ssgi;
         auto& postProcessing = scene->postProcessing;
 
         bool openSceneNotFoundPopup = false;
@@ -386,7 +367,6 @@ bool App::LoadScene() {
 
     scene->sky.probe = nullptr;
     scene->sky.clouds->enable = true;
-    scene->sss->enable = true;
 
     using namespace Atlas::Loader;
 
@@ -570,7 +550,6 @@ bool App::LoadScene() {
 
         scene->fog->enable = false;
         scene->sky.clouds->enable = false;
-        scene->sss->enable = true;
     }
     else if (sceneSelection == FOREST) {
         auto otherScene = Atlas::Loader::ModelLoader::LoadScene("forest/forest.gltf");
@@ -783,73 +762,6 @@ void App::CheckLoadScene() {
         mesh->cullBackFaces = true;
     }
 
-    if (sceneSelection == CORNELL) {
-        scene->irradianceVolume = std::make_shared<Atlas::Lighting::IrradianceVolume>(
-            sceneAABB.Scale(1.10f), glm::ivec3(20));
-        scene->irradianceVolume->sampleEmissives = true;
-        scene->irradianceVolume->SetRayCount(512, 32);
-    }
-    else if (sceneSelection == SPONZA) {
-        scene->irradianceVolume = std::make_shared<Atlas::Lighting::IrradianceVolume>(
-            sceneAABB.Scale(0.9f), glm::ivec3(20));
-        scene->irradianceVolume->SetRayCount(128, 32);
-        scene->irradianceVolume->strength = 1.5f;
-    }
-    else if (sceneSelection == BISTRO) {
-        scene->irradianceVolume = std::make_shared<Atlas::Lighting::IrradianceVolume>(
-            sceneAABB.Scale(0.9f), glm::ivec3(20));
-        scene->irradianceVolume->SetRayCount(32, 32);
-        scene->irradianceVolume->strength = 1.5f;
-    }
-    else if (sceneSelection == SANMIGUEL) {
-        scene->irradianceVolume = std::make_shared<Atlas::Lighting::IrradianceVolume>(
-            sceneAABB.Scale(1.0f), glm::ivec3(20));
-        scene->irradianceVolume->SetRayCount(128, 32);
-    }
-    else if (sceneSelection == MEDIEVAL) {
-        scene->irradianceVolume = std::make_shared<Atlas::Lighting::IrradianceVolume>(
-            sceneAABB.Scale(1.0f), glm::ivec3(20));
-        scene->irradianceVolume->SetRayCount(128, 32);
-    }
-    else if (sceneSelection == PICAPICA) {
-        for (auto& material : meshes.front()->data.materials) material->twoSided = false;
-
-        scene->irradianceVolume = std::make_shared<Atlas::Lighting::IrradianceVolume>(
-            sceneAABB.Scale(1.0f), glm::ivec3(20));
-        scene->irradianceVolume->SetRayCount(128, 32);
-    }
-    else if (sceneSelection == SUBWAY) {
-        scene->irradianceVolume = std::make_shared<Atlas::Lighting::IrradianceVolume>(
-            sceneAABB.Scale(1.05f), glm::ivec3(20));
-        scene->irradianceVolume->SetRayCount(128, 32);
-    }
-    else if (sceneSelection == MATERIALS) {
-        scene->irradianceVolume = std::make_shared<Atlas::Lighting::IrradianceVolume>(
-            sceneAABB.Scale(1.05f), glm::ivec3(20));
-        scene->irradianceVolume->SetRayCount(128, 32);
-    }
-    else if (sceneSelection == FOREST) {
-        scene->irradianceVolume = std::make_shared<Atlas::Lighting::IrradianceVolume>(
-            sceneAABB.Scale(1.05f), glm::ivec3(20));
-        scene->irradianceVolume->SetRayCount(32, 32);
-    }
-    else if (sceneSelection == NEWSPONZA) {
-        scene->irradianceVolume = std::make_shared<Atlas::Lighting::IrradianceVolume>(
-            sceneAABB.Scale(1.05f), glm::ivec3(20));
-        scene->irradianceVolume->SetRayCount(128, 32);
-    }
-    else if (sceneSelection == EMERALDSQUARE) {
-        scene->irradianceVolume = std::make_shared<Atlas::Lighting::IrradianceVolume>(
-            sceneAABB.Scale(1.05f), glm::ivec3(20));
-        scene->irradianceVolume->SetRayCount(128, 32);
-    }
-    else if (sceneSelection == FLYINGWORLD) {
-        scene->irradianceVolume = std::make_shared<Atlas::Lighting::IrradianceVolume>(
-            sceneAABB.Scale(1.05f), glm::ivec3(20));
-        scene->irradianceVolume->SetRayCount(128, 32);
-    }
-
-    scene->irradianceVolume->useShadowMap = true;
 
     Atlas::Clock::ResetAverage();
 
@@ -860,7 +772,6 @@ void App::CheckLoadScene() {
 void App::SetResolution(int32_t width, int32_t height) {
 
     renderTarget.Resize(width, height);
-    pathTraceTarget.Resize(width, height);
 
 }
 

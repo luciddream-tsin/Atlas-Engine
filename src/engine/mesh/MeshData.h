@@ -2,7 +2,6 @@
 
 #include "../System.h"
 #include "../volume/AABB.h"
-#include "../scene/RTStructures.h"
 #include "DataComponent.h"
 #include "Material.h"
 

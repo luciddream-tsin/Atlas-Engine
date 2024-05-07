@@ -67,15 +67,8 @@ void main() {
         shadowFactor = CalculateCascadedShadow(uniforms.light.shadow, cascadeMaps, surface.P,
             shadowNormal, saturate(dot(-uniforms.light.direction.xyz, shadowNormal)));
 #endif
-#ifdef SCREEN_SPACE_SHADOWS
-        float sssFactor = textureLod(sssTexture, texCoord, 0).r;
-        shadowFactor = min(sssFactor, shadowFactor);
-#endif
-#ifdef CLOUD_SHADOWS
-        float cloudShadowFactor = CalculateCloudShadow(surface.P, cloudShadowUniforms.cloudShadow, cloudMap);
 
-        shadowFactor = min(shadowFactor, cloudShadowFactor);
-#endif
+
         vec3 radiance = uniforms.light.color.rgb * uniforms.light.intensity;
         direct = direct * radiance * surface.NdotL * shadowFactor;
 

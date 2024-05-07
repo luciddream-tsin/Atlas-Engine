@@ -127,9 +127,6 @@ namespace Atlas {
 
             TextRenderer textRenderer;
             TextureRenderer textureRenderer;
-            OceanRenderer oceanRenderer;
-            AtmosphereRenderer atmosphereRenderer;
-            PathTracingRenderer pathTracingRenderer;
 
         private:
             struct PackedMaterial {
@@ -226,9 +223,6 @@ namespace Atlas {
             ShadowRenderer shadowRenderer;
             DirectLightRenderer directLightRenderer;
 
-            TemporalAARenderer taaRenderer;
-            PostProcessRenderer postProcessRenderer;
-            GBufferDownscaleRenderer downscaleRenderer;
 
             RenderList renderList;
 

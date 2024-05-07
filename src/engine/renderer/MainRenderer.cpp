@@ -44,13 +44,7 @@ namespace Atlas {
 
             opaqueRenderer.Init(device);
             shadowRenderer.Init(device);
-            downscaleRenderer.Init(device);
             directLightRenderer.Init(device);
-            atmosphereRenderer.Init(device);
-            oceanRenderer.Init(device);
-            taaRenderer.Init(device);
-            postProcessRenderer.Init(device);
-            pathTracingRenderer.Init(device);
 
             textRenderer.Init(device);
             textureRenderer.Init(device);
@@ -131,10 +125,6 @@ namespace Atlas {
                     //scene->sky.probe->update = false;
                 }
             }
-            else if (scene->sky.atmosphere) {
-                atmosphereRenderer.Render(&scene->sky.atmosphere->probe, scene, commandList);
-                FilterProbe(&scene->sky.atmosphere->probe, commandList);
-            }
 
             // Bind before any shadows etc. are rendered, this is a shared buffer for all these passes
             commandList->BindBuffer(renderList.currentMatricesBuffer, 1, 1);
@@ -197,7 +187,6 @@ namespace Atlas {
                 Graphics::Profiler::EndQuery();
             }
 
-            oceanRenderer.RenderDepthOnly(viewport, target, camera, scene, commandList);
 
             auto targetData = target->GetData(FULL_RES);
 
@@ -257,13 +246,7 @@ namespace Atlas {
                 commandList->PipelineBarrier(imageBarriers, bufferBarriers, VK_PIPELINE_STAGE_ALL_GRAPHICS_BIT);
             }
 
-            {
-                if (scene->sky.atmosphere) {
-                    atmosphereRenderer.Render(viewport, target, camera, scene, commandList);
-                }
-            }
 
-            downscaleRenderer.Downscale(target, commandList);
 
             {
                 Graphics::Profiler::BeginQuery("Lighting pass");
@@ -289,14 +272,11 @@ namespace Atlas {
             // downscaleRenderer.Downscale(target, commandList);
 
 
-            oceanRenderer.Render(viewport, target, camera, scene, commandList);
 
             {
-                taaRenderer.Render(viewport, target, camera, scene, commandList);
 
                 target->Swap();
 
-                postProcessRenderer.Render(viewport, target, camera, scene, commandList);
             }
 
             Graphics::Profiler::EndQuery();
@@ -372,19 +352,9 @@ namespace Atlas {
 
             Graphics::Profiler::EndQuery();
 
-            // No probe filtering required
-            if (scene->sky.atmosphere) {
-                atmosphereRenderer.Render(&scene->sky.atmosphere->probe, scene, commandList);
-            }
 
-            pathTracingRenderer.Render(viewport, target, ivec2(1, 1), camera, scene, commandList);
 
-            if (pathTracingRenderer.realTime) {
-                taaRenderer.Render(viewport, target, camera, scene, commandList);
-
-                postProcessRenderer.Render(viewport, target, camera, scene, commandList);
-            }
-            else {
+            {
                 Graphics::Profiler::BeginQuery("Post processing");
 
                 if (device->swapChain->isComplete) {

@@ -36,13 +36,13 @@ vec3 ACESToneMap(vec3 hdrColor) {
     float d = 0.59;
     float e = 0.14;
     return clamp((hdrColor*(a*hdrColor+b))/
-        (hdrColor*(c*hdrColor+d)+e), 0.0, 1.0);
+                 (hdrColor*(c*hdrColor+d)+e), 0.0, 1.0);
 }
 
 vec3 ToneMap(vec3 hdrColor) {
-    
+
     return vec3(1.0) - exp(-hdrColor);
-    
+
 }
 
 float ToneMap(float luminance) {
@@ -73,103 +73,26 @@ vec3 YCoCgToRGB(vec3 YCoCg) {
 }
 
 void main() {
-    
+
     vec2 texCoord = 0.5 * positionVS + 0.5;
     vec3 color = vec3(0.0);
-    
-#ifdef CHROMATIC_ABERRATION
-    vec2 uvRedChannel = (positionVS - positionVS * 0.005f * Uniforms.aberrationStrength
-        * Uniforms.aberrationReversed) * 0.5f + 0.5f;
-    vec2 uvGreenChannel = (positionVS - positionVS * 0.0025f * Uniforms.aberrationStrength) * 0.5f + 0.5f;
-    vec2 uvBlueChannel =  (positionVS - positionVS * 0.005f * Uniforms.aberrationStrength
-        * (1.0f - Uniforms.aberrationReversed)) * 0.5f + 0.5f;
-    
-    color.r = texture(hdrTexture, uvRedChannel).r;
-    color.g = texture(hdrTexture, uvGreenChannel).g;
-    color.b = texture(hdrTexture, uvBlueChannel).b;
-    
-#ifdef BLOOM
-    // We want to keep a constant expression in texture[const]
-    // because OpenGL ES doesn't support dynamic texture fetches
-    // inside a loop
-    if (Uniforms.bloomPasses > 0) {
-        color.r += texture(bloomFirstTexture, uvRedChannel).r;
-        color.g += texture(bloomFirstTexture, uvGreenChannel).g;
-        color.b += texture(bloomFirstTexture, uvBlueChannel).b;
-    }
-    if (Uniforms.bloomPasses > 1) {
-        color.r += texture(bloomSecondTexture, uvRedChannel).r;
-        color.g += texture(bloomSecondTexture, uvGreenChannel).g;
-        color.b += texture(bloomSecondTexture, uvBlueChannel).b;
-    }
-    if (Uniforms.bloomPasses > 2) {
-        color.r += texture(bloomThirdTexture, uvRedChannel).r;
-        color.g += texture(bloomThirdTexture, uvGreenChannel).g;
-        color.b += texture(bloomThirdTexture, uvBlueChannel).b;
-    }
-#endif
-#else
+
+
     color = texture(hdrTexture, texCoord).rgb;
-#ifdef BLOOM
-    if (Uniforms.bloomPasses > 0) {
-        color += texture(bloomFirstTexture, texCoord).rgb;
-    }
-    if (Uniforms.bloomPasses > 1) {
-        color += texture(bloomSecondTexture, texCoord).rgb;
-    }
-    if (Uniforms.bloomPasses > 2) {
-        color += texture(bloomThirdTexture, texCoord).rgb;
-    }
-#endif
-#endif
 
-    color *= Uniforms.exposure;
 
-#ifdef FILM_GRAIN
-    color = color + color * Uniforms.filmGrainStrength * (2.0 * random(vec3(texCoord * 1000.0, globalData[0].time)) - 1.0);
-    color = max(color, vec3(0.0));
-#endif
-    
+    // color *= Uniforms.exposure;
+
+
     // Apply the tone mapping because we want the colors to be back in
     // normal range
-#ifdef HDR
-    // Note: Tuned these two eotfs to be perceptually the same. Not sure how it turns out.
-    // Haven't tested with Dolby Vision
-#ifdef HYBRID_LOG_GAMMA_EOTF
-    // Dark regions are getting crushed too much, correct for that
-    color = pow(color, vec3(0.9));
-    color = Rec709ToRec2020(color);
-    color.rgb = InverseHybridLogGammeEotf(color);
-#endif
+    // color = ToneMap(color);
 
-#ifdef PERCEPTUAL_QUANTIZER_EOTF
-    color = Rec709ToRec2020(color);
-    color = InversePerceptualQuantizerEotf(color);
-#endif
-    
-#else
-#ifdef FILMIC_TONEMAPPING
-    color = ACESToneMap(color);
-#else
-    color = ToneMap(color);
-#endif
+    // color = clamp(saturate(color, Uniforms.saturation), vec3(0.0), vec3(1.0));
 
-#ifdef GAMMA_CORRECTION
-    color = pow(color, vec3(gamma));
-#endif
-#endif
+    // color = ((color - 0.5) * max(Uniforms.contrast, 0.0)) + 0.5;
 
-    color = clamp(saturate(color, Uniforms.saturation), vec3(0.0), vec3(1.0));
-
-    color = ((color - 0.5) * max(Uniforms.contrast, 0.0)) + 0.5;
-
-#ifdef VIGNETTE    
-    float vignetteFactor = max(1.0 - max(pow(length(fPosition) - Uniforms.vignetteOffset,
-        Uniforms.vignettePower), 0.0) * Uniforms.vignetteStrength, 0.0);
-    
-    color = mix(Uniforms.vignetteColor.rgb, color, Uniforms.vignetteFactor);
-#endif
 
     outColor = vec4(color, 1.0);
-    
+
 }

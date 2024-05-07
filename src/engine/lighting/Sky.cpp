@@ -14,7 +14,6 @@ namespace Atlas {
 
             // Prioritize user loaded cubemaps
             if (probe) return probe.get();
-            if (atmosphere) return &atmosphere->probe;
 
             return nullptr;
 

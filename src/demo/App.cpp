@@ -55,11 +55,7 @@ void App::LoadContent() {
 
     scene->sky.sun = directionalLight;
 
-    scene->sky.atmosphere = Atlas::CreateRef<Atlas::Lighting::Atmosphere>();
 
-    scene->postProcessing.taa = Atlas::PostProcessing::TAA(0.99f);
-    scene->postProcessing.sharpen.enable = true;
-    scene->postProcessing.sharpen.factor = 0.15f;
 
     LoadScene();
 
@@ -215,8 +211,6 @@ void App::Render(float deltaTime) {
         ImGui::NewFrame();
 
         const auto& light = directionalLight;
-        const auto& clouds = scene->sky.clouds;
-        auto& postProcessing = scene->postProcessing;
 
         bool openSceneNotFoundPopup = false;
 
@@ -352,13 +346,7 @@ bool App::LoadScene() {
     Atlas::Texture::Cubemap sky;
     directionalLight->direction = glm::vec3(0.0f, -1.0f, 1.0f);
 
-    scene->sky.clouds = Atlas::CreateRef<Atlas::Lighting::VolumetricClouds>();
-    scene->sky.clouds->minHeight = 1400.0f;
-    scene->sky.clouds->maxHeight = 1700.0f;
-    scene->sky.clouds->castShadow = false;
-
     scene->sky.probe = nullptr;
-    scene->sky.clouds->enable = true;
 
     using namespace Atlas::Loader;
 
@@ -533,7 +521,6 @@ bool App::LoadScene() {
         camera.rotation = glm::vec2(-3.14f / 2.0f, 0.0f);
         camera.exposure = 1.0f;
 
-        scene->sky.clouds->enable = false;
     }
     else if (sceneSelection == FOREST) {
         auto otherScene = Atlas::Loader::ModelLoader::LoadScene("forest/forest.gltf");
@@ -586,10 +573,7 @@ bool App::LoadScene() {
         camera.rotation = glm::vec2(-3.14f / 2.0f, 0.0f);
         camera.exposure = 1.0f;
 
-        scene->sky.clouds->minHeight = 700.0f;
-        scene->sky.clouds->maxHeight = 1000.0f;
-        scene->sky.clouds->densityMultiplier = 0.65f;
-        scene->sky.clouds->heightStretch = 1.0f;
+
 
     }
     else if (sceneSelection == NEWSPONZA) {
@@ -627,30 +611,13 @@ bool App::LoadScene() {
     // scene.sky.probe = std::make_shared<Atlas::Lighting::EnvironmentProbe>(sky);
 
     if (sceneSelection != FOREST && sceneSelection != EMERALDSQUARE) {
-        auto meshCount = 0;
+
         for (auto &mesh: meshes) {
-            if (meshCount == 10) {
-                meshCount++;
-                continue;
-            }
+
             actors.push_back(Atlas::Actor::MovableMeshActor{mesh, glm::translate(glm::mat4(1.0f),
                 glm::vec3(0.0f))});
-
-            /*
-            if (meshCount == 1) {
-                for (int32_t i = 0; i < 20000; i++) {
-                    auto x = (2.0f * Atlas::Common::Random::SampleFastUniformFloat() - 1.0f) * 100.0f;
-                    auto y = (2.0f * Atlas::Common::Random::SampleFastUniformFloat() - 1.0f) * 100.0f;
-                    auto z = (2.0f * Atlas::Common::Random::SampleFastUniformFloat() - 1.0f) * 100.0f;
-
-                    actors.push_back(Atlas::Actor::MovableMeshActor{mesh, glm::translate(glm::mat4(1.0f),
-                        glm::vec3(x, y, z))});
-                }
-            }
-            */
-
-            meshCount++;
         }
+
     }
 
     for (auto& actor : actors) {

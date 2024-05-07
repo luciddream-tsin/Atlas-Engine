@@ -25,7 +25,6 @@ namespace Atlas {
                 SpacePartitioning::operator=(that);
 
                 sky = that.sky;
-                postProcessing = that.postProcessing;
 
                 hasChanged = true;
 
@@ -56,7 +55,6 @@ namespace Atlas {
         void Scene::Clear() {
 
             sky = Lighting::Sky();
-            postProcessing = PostProcessing::PostProcessing();
 
             SceneNode::Clear();
             SpacePartitioning::Clear();

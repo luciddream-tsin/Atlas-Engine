@@ -63,7 +63,6 @@ namespace Atlas {
             using SceneNode::Remove;
 
             Lighting::Sky sky;
-            PostProcessing::PostProcessing postProcessing;
 
         private:
 

@@ -34,7 +34,6 @@ namespace Atlas {
             Graphics::Profiler::BeginQuery("Direct lighting");
 
             auto light = scene->sky.sun;
-            auto clouds = scene->sky.clouds;
 
             vec3 direction = normalize(vec3(camera->viewMatrix * vec4(light->direction, 0.0f)));
 

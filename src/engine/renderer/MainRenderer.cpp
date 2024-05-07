@@ -61,15 +61,7 @@ namespace Atlas {
 
             commandList->BeginCommands();
 
-            auto& taa = scene->postProcessing.taa;
-            if (taa.enable) {
-                auto jitter = 2.0f * haltonSequence[haltonIndex] - 1.0f;
-                jitter.x /= (float)target->GetWidth();
-                jitter.y /= (float)target->GetHeight();
-
-                camera->Jitter(jitter * taa.jitterRange);
-            }
-            else {
+            {
                 // Even if there is no TAA we need to update the jitter for other techniques
                 // E.g. the reflections and ambient occlusion use reprojection
                 camera->Jitter(vec2(0.0f));

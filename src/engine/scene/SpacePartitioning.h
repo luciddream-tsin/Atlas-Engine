@@ -30,14 +30,6 @@ namespace Atlas {
 
             void Remove(Actor::StaticMeshActor* actor);
 
-            void Add(Actor::DecalActor* actor);
-
-            void Remove(Actor::DecalActor* actor);
-
-            void Add(Actor::AudioActor* actor);            
-
-            void Remove(Actor::AudioActor* actor);
-
             void Add(Lighting::Light* light);
 
             void Remove(Lighting::Light* light);

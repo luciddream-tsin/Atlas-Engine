@@ -22,8 +22,6 @@ namespace Atlas {
             float planetRadius = 649000.0f;
 
             Ref<DirectionalLight> sun = nullptr;
-            Ref<Atmosphere> atmosphere = CreateRef<Atmosphere>();
-            Ref<VolumetricClouds> clouds = nullptr;
 
             Ref<EnvironmentProbe> probe = nullptr;
 

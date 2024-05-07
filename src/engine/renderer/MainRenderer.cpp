@@ -29,7 +29,6 @@ namespace Atlas {
 
             haltonSequence = Helper::HaltonSequence::Generate(2, 3, 16 + 1);
 
-            PreintegrateBRDF();
 
             auto uniformBufferDesc = Graphics::BufferDesc {
                 .usageFlags = VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
@@ -45,20 +44,10 @@ namespace Atlas {
 
             opaqueRenderer.Init(device);
             shadowRenderer.Init(device);
-            terrainShadowRenderer.Init(device);
             downscaleRenderer.Init(device);
-            ddgiRenderer.Init(device);
-            giRenderer.Init(device);
-            aoRenderer.Init(device);
-            rtrRenderer.Init(device);
-            sssRenderer.Init(device);
             directLightRenderer.Init(device);
-            indirectLightRenderer.Init(device);
-            skyboxRenderer.Init(device);
             atmosphereRenderer.Init(device);
             oceanRenderer.Init(device);
-            volumetricCloudRenderer.Init(device);
-            volumetricRenderer.Init(device);
             taaRenderer.Init(device);
             postProcessRenderer.Init(device);
             pathTracingRenderer.Init(device);
@@ -133,9 +122,6 @@ namespace Atlas {
             auto materialBuffer = device->CreateBuffer(materialBufferDesc);
             commandList->BindBuffer(materialBuffer, 1, 14);
 
-            if (scene->vegetation)
-                vegetationRenderer.helper.PrepareInstanceBuffer(*scene->vegetation, camera, commandList);
-
             if (scene->ocean && scene->ocean->enable)
                 scene->ocean->simulation.Compute(commandList);
 
@@ -162,7 +148,6 @@ namespace Atlas {
             {
                 shadowRenderer.Render(viewport, target, camera, scene, commandList, &renderList);
 
-                terrainShadowRenderer.Render(viewport, target, camera, scene, commandList);
             }
 
             if (scene->sky.GetProbe()) {
@@ -171,8 +156,6 @@ namespace Atlas {
                 commandList->BindImage(scene->sky.GetProbe()->filteredDiffuse.image,
                     scene->sky.GetProbe()->filteredDiffuse.sampler, 1, 11);
             }
-
-            volumetricCloudRenderer.RenderShadow(viewport, target, camera, scene, commandList);
 
             {
                 VkImageLayout layout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
@@ -201,19 +184,12 @@ namespace Atlas {
                 commandList->PipelineBarrier(imageBarriers, bufferBarriers, VK_PIPELINE_STAGE_ALL_GRAPHICS_BIT);
             }
 
-            ddgiRenderer.TraceAndUpdateProbes(scene, commandList);
-
             {
                 Graphics::Profiler::BeginQuery("Main render pass");
 
                 commandList->BeginRenderPass(target->gBufferRenderPass, target->gBufferFrameBuffer, true);
 
                 opaqueRenderer.Render(viewport, target, camera, scene, commandList, &renderList, materialMap);
-
-                ddgiRenderer.DebugProbes(viewport, target, camera, scene, commandList, materialMap);
-
-                vegetationRenderer.Render(viewport, target, camera, scene, commandList, materialMap);
-
 
 
                 commandList->EndRenderPass();
@@ -282,21 +258,12 @@ namespace Atlas {
             }
 
             {
-                if (scene->sky.probe) {
-                    skyboxRenderer.Render(viewport, target, camera, scene, commandList);
-                }
-                else if (scene->sky.atmosphere) {
+                if (scene->sky.atmosphere) {
                     atmosphereRenderer.Render(viewport, target, camera, scene, commandList);
                 }
             }
 
             downscaleRenderer.Downscale(target, commandList);
-
-            aoRenderer.Render(viewport, target, camera, scene, commandList);
-
-            rtrRenderer.Render(viewport, target, camera, scene, commandList);
-
-            sssRenderer.Render(viewport, target, camera, scene, commandList);
 
             {
                 Graphics::Profiler::BeginQuery("Lighting pass");
@@ -309,12 +276,6 @@ namespace Atlas {
                 commandList->ImageMemoryBarrier(target->lightingTexture.image, VK_IMAGE_LAYOUT_GENERAL,
                     VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT);
 
-                giRenderer.Render(viewport, target, camera, scene, commandList);
-
-                commandList->ImageMemoryBarrier(target->lightingTexture.image, VK_IMAGE_LAYOUT_GENERAL,
-                    VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT);
-
-                indirectLightRenderer.Render(viewport, target, camera, scene, commandList);
 
                 Graphics::ImageBarrier outBarrier(target->lightingTexture.image,
                     VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, VK_ACCESS_SHADER_READ_BIT);
@@ -327,11 +288,6 @@ namespace Atlas {
             // This was needed after the ocean renderer, if we ever want to have alpha transparency we need it again
             // downscaleRenderer.Downscale(target, commandList);
 
-            {
-                volumetricCloudRenderer.Render(viewport, target, camera, scene, commandList);
-
-                volumetricRenderer.Render(viewport, target, camera, scene, commandList);
-            }
 
             oceanRenderer.Render(viewport, target, camera, scene, commandList);
 
@@ -978,14 +934,6 @@ namespace Atlas {
             std::unordered_map<void*, uint16_t>& materialMap) {
 
             auto sceneMaterials = scene->GetMaterials();
-
-            // For debugging purpose
-            if (scene->irradianceVolume && scene->irradianceVolume->debug) {
-                sceneMaterials.push_back(&ddgiRenderer.probeDebugMaterial);
-                sceneMaterials.push_back(&ddgiRenderer.probeDebugActiveMaterial);
-                sceneMaterials.push_back(&ddgiRenderer.probeDebugInactiveMaterial);
-                sceneMaterials.push_back(&ddgiRenderer.probeDebugOffsetMaterial);
-            }
 
             uint16_t idx = 0;
 

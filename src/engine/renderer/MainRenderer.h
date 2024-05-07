@@ -224,23 +224,11 @@ namespace Atlas {
 
             OpaqueRenderer opaqueRenderer;
             ShadowRenderer shadowRenderer;
-            VegetationRenderer vegetationRenderer;
-            TerrainShadowRenderer terrainShadowRenderer;
-            DecalRenderer decalRenderer;
             DirectLightRenderer directLightRenderer;
-            IndirectLightRenderer indirectLightRenderer;
 
             TemporalAARenderer taaRenderer;
-            SkyboxRenderer skyboxRenderer;
             PostProcessRenderer postProcessRenderer;
             GBufferDownscaleRenderer downscaleRenderer;
-            GIRenderer giRenderer;
-            DDGIRenderer ddgiRenderer;
-            AORenderer aoRenderer;
-            RTReflectionRenderer rtrRenderer;
-            SSSRenderer sssRenderer;
-            VolumetricRenderer volumetricRenderer;
-            VolumetricCloudRenderer volumetricCloudRenderer;
 
             RenderList renderList;
 

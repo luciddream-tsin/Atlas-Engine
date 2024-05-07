@@ -24,7 +24,6 @@ namespace Atlas {
             PipelineConfig pipelineConfig;
 
             Buffer::UniformBuffer uniformBuffer;
-            Buffer::UniformBuffer cloudShadowUniformBuffer;
             Ref<Graphics::Sampler> shadowSampler;
 
         };

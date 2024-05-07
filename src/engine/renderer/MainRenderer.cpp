@@ -271,13 +271,47 @@ namespace Atlas {
             // This was needed after the ocean renderer, if we ever want to have alpha transparency we need it again
             // downscaleRenderer.Downscale(target, commandList);
 
-
-
             {
 
-                target->Swap();
+                Graphics::Profiler::BeginQuery("Main");
 
+                auto shaderConfig = ShaderConfig {
+                        { "postprocessing.vsh", VK_SHADER_STAGE_VERTEX_BIT },
+                        { "postprocessing.fsh", VK_SHADER_STAGE_FRAGMENT_BIT }
+                };
+                auto pipelineDesc = Graphics::GraphicsPipelineDesc {
+                        .swapChain = device->swapChain
+                };
+
+                std::vector<std::string> macros;
+
+                auto pipelineConfig =  PipelineConfig(shaderConfig, pipelineDesc, macros);
+
+                // We can't return here because of the queries
+                if (device->swapChain->isComplete) {
+                    commandList->BeginRenderPass(device->swapChain, true);
+
+                    pipelineConfig.ManageMacro("FILMIC_TONEMAPPING", false);
+                    pipelineConfig.ManageMacro("VIGNETTE", false);
+                    pipelineConfig.ManageMacro("CHROMATIC_ABERRATION", false);
+                    pipelineConfig.ManageMacro("FILM_GRAIN", false);
+
+                    auto pipeline = PipelineManager::GetPipeline(pipelineConfig);
+                    commandList->BindPipeline(pipeline);
+                    //SetUniforms(camera, scene);
+                    {
+                        target->lightingTexture.Bind(commandList, 3, 0);
+                    }
+
+                    commandList->Draw(6, 1, 0, 0);
+
+                    commandList->EndRenderPass();
+                }
+
+                Graphics::Profiler::EndQuery();
             }
+
+
 
             Graphics::Profiler::EndQuery();
             Graphics::Profiler::EndThread();

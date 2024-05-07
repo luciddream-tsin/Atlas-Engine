@@ -215,7 +215,6 @@ void App::Render(float deltaTime) {
         ImGui::NewFrame();
 
         const auto& light = directionalLight;
-        const auto& fog = scene->fog;
         const auto& clouds = scene->sky.clouds;
         auto& postProcessing = scene->postProcessing;
 
@@ -380,7 +379,6 @@ bool App::LoadScene() {
         camera.location = glm::vec3(0.0f, 14.0f, 40.0f);
         camera.rotation = glm::vec2(-3.14f, -0.1f);
 
-        scene->fog->enable = false;
     }
     else if (sceneSelection == SPONZA) {
         meshes.reserve(1);
@@ -416,7 +414,6 @@ bool App::LoadScene() {
         camera.rotation = glm::vec2(-3.14f / 2.0f, 0.0f);
         camera.exposure = 0.125f;
 
-        scene->fog->enable = true;
     }
     else if (sceneSelection == BISTRO) {
         meshes.reserve(1);
@@ -436,7 +433,6 @@ bool App::LoadScene() {
         camera.rotation = glm::vec2(3.14f / 2.0f, 0.0f);
         camera.exposure = 0.125f;
 
-        scene->fog->enable = true;
     }
     else if (sceneSelection == SANMIGUEL) {
         meshes.reserve(1);
@@ -457,7 +453,6 @@ bool App::LoadScene() {
         camera.rotation = glm::vec2(-4.14f / 2.0f, -.6f);
         camera.exposure = 2.5f;
 
-        scene->fog->enable = true;
     }
     else if (sceneSelection == MEDIEVAL) {
         meshes.reserve(1);
@@ -478,7 +473,6 @@ bool App::LoadScene() {
         camera.location = glm::vec3(30.0f, 25.0f, 0.0f);
         camera.rotation = glm::vec2(-3.14f / 2.0f, 0.0f);
 
-        scene->fog->enable = true;
     }
     else if (sceneSelection == PICAPICA) {
         meshes.reserve(1);
@@ -498,7 +492,6 @@ bool App::LoadScene() {
         camera.rotation = glm::vec2(-3.14f / 2.0f, 0.0f);
         camera.exposure = 1.0f;
 
-        scene->fog->enable = true;
     }
     else if (sceneSelection == SUBWAY) {
         meshes.reserve(1);
@@ -517,7 +510,6 @@ bool App::LoadScene() {
         camera.rotation = glm::vec2(-3.14f / 2.0f, 0.0f);
         camera.exposure = 1.0f;
 
-        scene->fog->enable = false;
     }
     else if (sceneSelection == MATERIALS) {
         meshes.reserve(1);
@@ -541,7 +533,6 @@ bool App::LoadScene() {
         camera.rotation = glm::vec2(-3.14f / 2.0f, 0.0f);
         camera.exposure = 1.0f;
 
-        scene->fog->enable = false;
         scene->sky.clouds->enable = false;
     }
     else if (sceneSelection == FOREST) {
@@ -559,7 +550,6 @@ bool App::LoadScene() {
         camera.rotation = glm::vec2(-3.14f / 2.0f, 0.0f);
         camera.exposure = 1.0f;
 
-        scene->fog->enable = false;
     }
     else if (sceneSelection == EMERALDSQUARE) {
         auto otherScene = Atlas::Loader::ModelLoader::LoadScene("emeraldsquare/square.gltf", false, glm::mat4(1.0f), 1024);
@@ -575,8 +565,6 @@ bool App::LoadScene() {
         camera.location = glm::vec3(30.0f, 25.0f, 0.0f);
         camera.rotation = glm::vec2(-3.14f / 2.0f, 0.0f);
         camera.exposure = 1.0f;
-
-        scene->fog->enable = false;
     }
     else if (sceneSelection == FLYINGWORLD) {
         meshes.reserve(1);
@@ -603,7 +591,6 @@ bool App::LoadScene() {
         scene->sky.clouds->densityMultiplier = 0.65f;
         scene->sky.clouds->heightStretch = 1.0f;
 
-        scene->fog->enable = true;
     }
     else if (sceneSelection == NEWSPONZA) {
         meshes.reserve(4);
@@ -635,7 +622,6 @@ bool App::LoadScene() {
         camera.location = glm::vec3(30.0f, 25.0f, 0.0f);
         camera.rotation = glm::vec2(-3.14f / 2.0f, 0.0f);
 
-        scene->fog->enable = true;
     }
 
     // scene.sky.probe = std::make_shared<Atlas::Lighting::EnvironmentProbe>(sky);
@@ -694,7 +680,6 @@ void App::UnloadScene() {
     actors.shrink_to_fit();
     meshes.shrink_to_fit();
 
-    scene->ClearRTStructures();
 
     graphicsDevice->WaitForIdle();
     graphicsDevice->ForceMemoryCleanup();
@@ -721,26 +706,6 @@ void App::CheckLoadScene() {
                 material->metalness = 0.0f;
     }
 
-    static std::future<void> future;
-
-    auto buildRTStructure = [&]() {
-        auto sceneMeshes = scene->GetMeshes();
-
-        for (const auto& mesh : sceneMeshes) {
-            mesh->BuildBVH();
-        }
-    };
-
-    if (!future.valid()) {
-        future = std::async(std::launch::async, buildRTStructure);
-        return;
-    }
-    else {
-        if (future.wait_for(std::chrono::microseconds(0)) != std::future_status::ready) {
-            return;
-        }
-        future.get();
-    }
 
     auto sceneAABB = Atlas::Volume::AABB(glm::vec3(std::numeric_limits<float>::max()),
         glm::vec3(-std::numeric_limits<float>::max()));

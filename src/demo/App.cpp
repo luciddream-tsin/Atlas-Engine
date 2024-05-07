@@ -55,13 +55,6 @@ void App::LoadContent() {
 
     scene->sky.sun = directionalLight;
 
-
-    scene->fog = Atlas::CreateRef<Atlas::Lighting::Fog>();
-    scene->fog->enable = true;
-    scene->fog->density = 0.0002f;
-    scene->fog->heightFalloff = 0.0284f;
-    scene->fog->height = 0.0f;
-
     scene->sky.atmosphere = Atlas::CreateRef<Atlas::Lighting::Atmosphere>();
 
     scene->postProcessing.taa = Atlas::PostProcessing::TAA(0.99f);

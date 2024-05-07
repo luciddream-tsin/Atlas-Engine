@@ -17,7 +17,6 @@
 #include "../Decal.h"
 
 #include "SceneNode.h"
-#include "SpacePartitioning.h"
 #include "RTData.h"
 #include "Vegetation.h"
 
@@ -27,27 +26,13 @@ namespace Atlas {
 
     namespace Scene {
 
-        class Scene : public SceneNode, public SpacePartitioning {
+        class Scene : public SceneNode  {
 
-            friend class RTData;
-            friend class Renderer::Helper::RayTracingHelper;
             friend class Renderer::MainRenderer;
 
         public:
-            /**
-             * Constructs a scene object.
-             */
-            Scene() : SceneNode(this, &rootMeshMap), SpacePartitioning(vec3(-2048.0f), vec3(2048.0f), 5),
-                      rtData(this) {}
 
-            /**
-             * Constructs a scene object.
-             * @param min The minimum scene boundary.
-             * @param max The maximum scene boundary.
-             * @param depth The maximum depths of the octrees.
-             * @note The boundary should be as tightly fitted to the scene as possible.
-             * It determines the size of the octrees.
-             */
+
             Scene(vec3 min, vec3 max, int32_t depth = 5);
 
             /**
@@ -95,10 +80,7 @@ namespace Atlas {
              */
             std::vector<Material*> GetMaterials();
 
-            /**
-             *
-             */
-            void ClearRTStructures();
+
 
             /**
              * Waits for all resources to be loaded that are in the scene
@@ -111,11 +93,6 @@ namespace Atlas {
              */
             bool IsFullyLoaded();
 
-            /**
-             *
-             * @return
-             */
-            bool IsRtDataValid();
 
             /**
              * To overload the Add and Remove methods we need to specify this
@@ -125,7 +102,6 @@ namespace Atlas {
             using SceneNode::Remove;
 
             Lighting::Sky sky;
-            Ref<Lighting::Fog> fog = nullptr;
             PostProcessing::PostProcessing postProcessing;
 
         private:
@@ -135,10 +111,8 @@ namespace Atlas {
             std::unordered_map<Ref<Texture::Texture2D>, uint32_t> textureToBindlessIdx;
             std::unordered_map<size_t, uint32_t> meshIdToBindlessIdx;
 
-            RTData rtData;
 
             bool hasChanged = true;
-            bool rtDataValid = false;
 
         };
 

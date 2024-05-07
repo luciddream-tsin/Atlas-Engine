@@ -4,8 +4,7 @@ namespace Atlas {
 
     namespace Scene {
 
-        Scene::Scene(vec3 min, vec3 max, int32_t depth) : SceneNode(),
-            SpacePartitioning(min, max, depth), rtData(this) {
+        Scene::Scene(vec3 min, vec3 max, int32_t depth) : SceneNode() {
 
             AddToScene(this, &rootMeshMap);
 
@@ -22,7 +21,6 @@ namespace Atlas {
             if (this != &that) {
 
                 SceneNode::operator=(that);
-                SpacePartitioning::operator=(that);
 
                 sky = that.sky;
                 postProcessing = that.postProcessing;
@@ -49,9 +47,6 @@ namespace Atlas {
 
             UpdateBindlessIndexMaps();
 
-            // Make sure this is changed just once at the start of a frame
-            rtData.Update(true);
-            rtDataValid = rtData.IsValid();
 
         }
 
@@ -67,7 +62,6 @@ namespace Atlas {
             postProcessing = PostProcessing::PostProcessing();
 
             SceneNode::Clear();
-            SpacePartitioning::Clear();
 
         }
 
@@ -105,13 +99,6 @@ namespace Atlas {
 
         }
 
-        void Scene::ClearRTStructures() {
-
-            rtDataValid = false;
-            rtData.Clear();
-
-        }
-
         void Scene::WaitForResourceLoad() {
 
             auto meshes = GetMeshes();
@@ -136,11 +123,7 @@ namespace Atlas {
 
         }
 
-        bool Scene::IsRtDataValid() {
 
-            return rtDataValid;
-
-        }
 
         void Scene::UpdateBindlessIndexMaps() {
 

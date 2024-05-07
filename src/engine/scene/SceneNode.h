@@ -7,7 +7,6 @@
 #include "../lighting/Light.h"
 #include "../Decal.h"
 
-#include "SpacePartitioning.h"
 
 #include <vector>
 #include <unordered_map>
@@ -30,12 +29,6 @@ namespace Atlas {
             SceneNode() = default;
 
             SceneNode(const SceneNode& that);
-
-            /**
-             * 
-             */
-            SceneNode(SpacePartitioning* partitioning,
-                std::unordered_map<size_t, RegisteredMesh>* meshMap) { AddToScene(partitioning, meshMap); }
 
             /**
              * 
@@ -84,31 +77,6 @@ namespace Atlas {
              */
             virtual void Remove(Actor::StaticMeshActor *actor);
 
-            /**
-             *
-             * @param decal
-             * @note An actor can only be attached to one node.
-             */
-            virtual void Add(Actor::DecalActor* decal);
-
-            /**
-             *
-             * @param decal
-             */
-            virtual void Remove(Actor::DecalActor* decal);
-
-            /**
-             *
-             * @param decal
-             * @note An actor can only be attached to one node.
-             */
-            virtual void Add(Actor::AudioActor* decal);
-
-            /**
-             *
-             * @param decal
-             */
-            virtual void Remove(Actor::AudioActor* decal);
 
             /**
              *
@@ -126,21 +94,13 @@ namespace Atlas {
              *
              * @param matrix
              */
-            virtual void SetMatrix(mat4 matrix);
 
-            virtual mat4 GetMatrix() const;
-
-            virtual mat4 GetGlobalMatrix() const;
 
             virtual void Clear();
 
             virtual std::vector<Actor::MovableMeshActor*> GetNodeMovableMeshActors();
 
             virtual std::vector<Actor::StaticMeshActor*> GetNodeStaticMeshActors();
-
-            virtual std::vector<Actor::DecalActor*> GetNodeDecalActors();
-
-            virtual std::vector<Actor::AudioActor*> GetNodeAudioActors();
 
             virtual std::vector<Lighting::Light*> GetNodeLights();
 
@@ -149,31 +109,15 @@ namespace Atlas {
             std::string name;
 
         protected:
-            /**
-             *
-             * @param scene
-             */
-            virtual void AddToScene(SpacePartitioning* spacePartitioning,
-                std::unordered_map<size_t, RegisteredMesh>* meshMap);
 
-            /**
-             *
-             */
             virtual void RemoveFromScene();
 
-            /**
-             *
-             * @param deltaTime
-             * @param parentTransformation
-             * @param parentTransformChanged
-             * @return True if something has changed, false otherwise
-             */
+
             virtual bool Update(Camera* camera, float deltaTime, mat4 parentTransformation,
                 bool parentTransformChanged);
 
             void DeepCopy(const SceneNode& that);
 
-            bool sceneSet = false;
             bool matrixChanged = true;
 
             mat4 matrix = mat4{ 1.0f };
@@ -182,18 +126,12 @@ namespace Atlas {
             std::vector<SceneNode*> childNodes;
             std::vector<Actor::MovableMeshActor*> movableMeshActors;
             std::vector<Actor::StaticMeshActor*> staticMeshActors;
-            std::vector<Actor::DecalActor*> decalActors;
-            std::vector<Actor::AudioActor*> audioActors;
             std::vector<Lighting::Light*> lights;
 
-            std::vector<Actor::StaticMeshActor*> addableStaticMeshActors;
-
-            SpacePartitioning* spacePartitioning = nullptr;
             std::unordered_map<size_t, RegisteredMesh>* meshMap = nullptr;
 
         private:
             virtual void AddInternal(Actor::MeshActor* actor);
-
             virtual void RemoveInternal(Actor::MeshActor* actor);
 
         };

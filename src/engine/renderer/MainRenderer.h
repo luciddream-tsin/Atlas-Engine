@@ -179,8 +179,6 @@ namespace Atlas {
             Texture::Texture2D dfgPreintegrationTexture;
 
             Ref<Graphics::MultiBuffer> globalUniformBuffer;
-            Ref<Graphics::MultiBuffer> pathTraceGlobalUniformBuffer;
-            Ref<Graphics::MultiBuffer> ddgiUniformBuffer;
             Ref<Graphics::DescriptorSetLayout> globalDescriptorSetLayout;
             Ref<Graphics::Sampler> globalSampler;
 

@@ -52,7 +52,6 @@ layout(location=6) out mat3 TBN;
 #endif
 
 layout(push_constant) uniform constants {
-    uint vegetation;
     uint invertUVs;
     uint twoSided;
     uint staticMesh;
@@ -76,12 +75,7 @@ void main() {
     vec3 position = vPosition;
     vec3 lastPosition = vPosition;
 
-    if (PushConstants.vegetation > 0) {
 
-        position = WindAnimation(vPosition, globalData[0].time, mMatrix[3].xyz);
-        lastPosition = WindAnimation(vPosition, globalData[0].time - globalData[0].deltaTime, mMatrix[3].xyz);
-
-    }
 
     vec4 positionToCamera = mvMatrix * vec4(position, 1.0);
     positionVS = positionToCamera.xyz;

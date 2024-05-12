@@ -49,7 +49,6 @@ layout(location=6) in mat3 TBN;
 #endif
 
 layout(push_constant) uniform constants {
-    uint vegetation;
     uint invertUVs;
     uint twoSided;
     uint staticMesh;
@@ -182,5 +181,5 @@ void main() {
     velocityFS = (ndcL - ndcC) * 0.5;
 
     materialIdxFS = PushConstants.materialIdx;
-    
+
 }

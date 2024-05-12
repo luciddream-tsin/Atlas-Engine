@@ -27,7 +27,6 @@ namespace Atlas {
                 ResourceHandle<Mesh::Mesh>& mesh, RenderTarget* target);
 
             struct PushConstants {
-                uint32_t vegetation;
                 uint32_t invertUVs;
                 uint32_t twoSided;
                 uint32_t staticMesh;

@@ -37,10 +37,7 @@ namespace Atlas {
                 .size = sizeof(GlobalUniforms),
             };
             globalUniformBuffer = device->CreateMultiBuffer(uniformBufferDesc);
-            pathTraceGlobalUniformBuffer = device->CreateMultiBuffer(uniformBufferDesc);
 
-            uniformBufferDesc.size = sizeof(DDGIUniforms);
-            ddgiUniformBuffer = device->CreateMultiBuffer(uniformBufferDesc);
 
             opaqueRenderer.Init(device);
             shadowRenderer.Init(device);

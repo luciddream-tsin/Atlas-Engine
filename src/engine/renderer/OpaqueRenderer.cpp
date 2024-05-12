@@ -81,7 +81,6 @@ namespace Atlas {
                     material->displacementMap->Bind(commandList, 3, 6);
 
                 auto pushConstants = PushConstants {
-                    .vegetation = mesh->vegetation ? 1u : 0u,
                     .invertUVs = mesh->invertUVs ? 1u : 0u,
                     .twoSided = material->twoSided ? 1u : 0u,
                     .staticMesh = mesh->mobility == Mesh::MeshMobility::Stationary ? 1u : 0u,

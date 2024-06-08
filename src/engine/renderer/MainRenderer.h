@@ -37,59 +37,8 @@ namespace Atlas {
                 RenderBatch* batch = nullptr);
 
 
-            /**
-             *
-             * @param window
-             * @param color
-             * @param x
-             * @param y
-             * @param width
-             * @param height
-             * @param alphaBlending
-             * @param framebuffer
-             */
-            void RenderRectangle(Viewport* viewport, vec4 color, float x, float y, float width, float height,
-                                 bool alphaBlending = false);
 
-            /**
-             *
-             * @param window
-             * @param color
-             * @param x
-             * @param y
-             * @param width
-             * @param height
-             * @param clipArea
-             * @param blendArea
-             * @param alphaBlending
-             * @param framebuffer
-             */
-            void RenderRectangle(Viewport* viewport, vec4 color, float x, float y, float width, float height,
-                                 vec4 clipArea, vec4 blendArea, bool alphaBlending = false);
 
-            /**
-             *
-             * @param viewport
-             * @param camera
-             * @param batch
-             */
-            void RenderBatched(Viewport* viewport, Camera* camera, RenderBatch* batch);
-
-            /**
-             * Renders the scene into an environment probe
-             * @param probe The environment probe.
-             * @param target A render target to support rendering
-             * @param scene The scene which should be rendered-
-             * @note The render target must have the same resolution as the probe.
-             */
-            void RenderProbe(Lighting::EnvironmentProbe* probe, RenderTarget* target, Scene::Scene* scene);
-
-            /**
-             * Filters an environment probe.
-             * @param probe The environment probe.
-             * @note A probe has to be filtered to support image based lighting
-             */
-            void FilterProbe(Lighting::EnvironmentProbe* probe, Graphics::CommandList* commandList);
 
             /**
              * Update of the renderer
@@ -172,7 +121,6 @@ namespace Atlas {
 
              void FillRenderList(Scene::Scene* scene, Camera* camera);
 
-            void PreintegrateBRDF();
 
             Graphics::GraphicsDevice* device = nullptr;
 
@@ -182,8 +130,6 @@ namespace Atlas {
             Ref<Graphics::DescriptorSetLayout> globalDescriptorSetLayout;
             Ref<Graphics::Sampler> globalSampler;
 
-            Buffer::VertexArray vertexArray;
-            Buffer::VertexArray cubeVertexArray;
 
             OpaqueRenderer opaqueRenderer;
             ShadowRenderer shadowRenderer;
@@ -192,8 +138,6 @@ namespace Atlas {
 
             RenderList renderList;
 
-            std::vector<vec2> haltonSequence;
-            size_t haltonIndex = 0;
             uint32_t frameCount = 0;
 
         };

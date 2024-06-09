@@ -68,15 +68,11 @@ namespace Atlas {
 
             PrepareMaterials(scene, materials, materialMap);
 
-            std::vector<Ref<Graphics::Image>> images;
 
             SetUniforms(scene, camera);
 
             commandList->BindBuffer(globalUniformBuffer, 0, 3);
-            commandList->BindSampler(globalSampler, 1, 13);
 
-            if (images.size())
-                commandList->BindSampledImages(images, 0, 4);
 
             auto materialBufferDesc = Graphics::BufferDesc {
                 .usageFlags = VK_BUFFER_USAGE_STORAGE_BUFFER_BIT,
@@ -97,12 +93,12 @@ namespace Atlas {
                 shadowRenderer.Render(viewport, target, camera, scene, commandList, &renderList);
             }
 
-            if (scene->sky.GetProbe()) {
-                commandList->BindImage(scene->sky.GetProbe()->filteredSpecular.image,
-                    scene->sky.GetProbe()->filteredSpecular.sampler, 1, 10);
-                commandList->BindImage(scene->sky.GetProbe()->filteredDiffuse.image,
-                    scene->sky.GetProbe()->filteredDiffuse.sampler, 1, 11);
-            }
+            // if (scene->sky.GetProbe()) {
+            //     commandList->BindImage(scene->sky.GetProbe()->filteredSpecular.image,
+            //         scene->sky.GetProbe()->filteredSpecular.sampler, 1, 10);
+            //     commandList->BindImage(scene->sky.GetProbe()->filteredDiffuse.image,
+            //         scene->sky.GetProbe()->filteredDiffuse.sampler, 1, 11);
+            // }
 
             {
                 VkImageLayout layout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;

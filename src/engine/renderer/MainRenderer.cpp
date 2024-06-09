@@ -74,58 +74,11 @@ namespace Atlas {
             commandList->BindBuffer(globalUniformBuffer, 0, 3);
 
 
-            auto materialBufferDesc = Graphics::BufferDesc {
-                .usageFlags = VK_BUFFER_USAGE_STORAGE_BUFFER_BIT,
-                .domain = Graphics::BufferDomain::Host,
-                .hostAccess = Graphics::BufferHostAccess::Sequential,
-                .data = materials.data(),
-                .size = sizeof(PackedMaterial) * glm::max(materials.size(), size_t(1)),
-            };
-            auto materialBuffer = device->CreateBuffer(materialBufferDesc);
-            commandList->BindBuffer(materialBuffer, 1, 14);
-
-
             // Bind before any shadows etc. are rendered, this is a shared buffer for all these passes
             commandList->BindBuffer(renderList.currentMatricesBuffer, 1, 1);
             commandList->BindBuffer(renderList.lastMatricesBuffer, 1, 2);
 
-            {
-                shadowRenderer.Render(viewport, target, camera, scene, commandList, &renderList);
-            }
 
-            // if (scene->sky.GetProbe()) {
-            //     commandList->BindImage(scene->sky.GetProbe()->filteredSpecular.image,
-            //         scene->sky.GetProbe()->filteredSpecular.sampler, 1, 10);
-            //     commandList->BindImage(scene->sky.GetProbe()->filteredDiffuse.image,
-            //         scene->sky.GetProbe()->filteredDiffuse.sampler, 1, 11);
-            // }
-
-            {
-                VkImageLayout layout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-                VkAccessFlags access = VK_ACCESS_SHADER_READ_BIT;
-
-                std::vector<Graphics::BufferBarrier> bufferBarriers;
-                std::vector<Graphics::ImageBarrier> imageBarriers;
-
-                auto lights = scene->GetLights();
-                if (scene->sky.sun) {
-                    lights.push_back(scene->sky.sun.get());
-                }
-
-                for (auto& light : lights) {
-
-                    auto shadow = light->GetShadow();
-
-                    if (!shadow) {
-                        continue;
-                    }
-
-                    imageBarriers.push_back({ shadow->useCubemap ? shadow->cubemap.image : shadow->maps.image, layout, access });
-
-                }
-
-                commandList->PipelineBarrier(imageBarriers, bufferBarriers, VK_PIPELINE_STAGE_ALL_GRAPHICS_BIT);
-            }
 
             {
                 Graphics::Profiler::BeginQuery("Main render pass");
@@ -133,96 +86,11 @@ namespace Atlas {
                 commandList->BeginRenderPass(target->gBufferRenderPass, target->gBufferFrameBuffer, true);
 
                 opaqueRenderer.Render(viewport, target, camera, scene, commandList, &renderList, materialMap);
-
-
                 commandList->EndRenderPass();
 
                 Graphics::Profiler::EndQuery();
             }
 
-
-            auto targetData = target->GetData(FULL_RES);
-
-            commandList->BindImage(targetData->baseColorTexture->image, targetData->baseColorTexture->sampler, 1, 3);
-            commandList->BindImage(targetData->normalTexture->image, targetData->normalTexture->sampler, 1, 4);
-            commandList->BindImage(targetData->geometryNormalTexture->image, targetData->geometryNormalTexture->sampler, 1, 5);
-            commandList->BindImage(targetData->roughnessMetallicAoTexture->image, targetData->roughnessMetallicAoTexture->sampler, 1, 6);
-            commandList->BindImage(targetData->materialIdxTexture->image, targetData->materialIdxTexture->sampler, 1, 7);
-            commandList->BindImage(targetData->depthTexture->image, targetData->depthTexture->sampler, 1, 8);
-
-            /*if (!target->HasHistory()) {
-                auto rtData = target->GetHistoryData(HALF_RES);
-                VkImageLayout layout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-                VkAccessFlags access = VK_ACCESS_SHADER_READ_BIT;
-                std::vector<Graphics::BufferBarrier> bufferBarriers;
-                std::vector<Graphics::ImageBarrier> imageBarriers = {
-                    {rtData->baseColorTexture->image, layout, access},
-                    {rtData->depthTexture->image, layout, access},
-                    {rtData->normalTexture->image, layout, access},
-                    {rtData->geometryNormalTexture->image, layout, access},
-                    {rtData->roughnessMetallicAoTexture->image, layout, access},
-                    {rtData->offsetTexture->image, layout, access},
-                    {rtData->materialIdxTexture->image, layout, access},
-                    {rtData->stencilTexture->image, layout, access},
-                    {rtData->velocityTexture->image, layout, access},
-                    {rtData->swapVelocityTexture->image, layout, access},
-                    {target->historyAoTexture.image, layout, access},
-                    {target->historyAoLengthTexture.image, layout, access},
-                    {target->historyReflectionTexture.image, layout, access},
-                    {target->historyReflectionMomentsTexture.image, layout, access},
-                    {target->historyVolumetricCloudsTexture.image, layout, access}
-                };
-                commandList->PipelineBarrier(imageBarriers, bufferBarriers, VK_PIPELINE_STAGE_ALL_COMMANDS_BIT);
-            }*/
-
-            /*{
-                auto rtData = target->GetHistoryData(FULL_RES);
-
-                VkImageLayout layout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-                VkAccessFlags access = VK_ACCESS_SHADER_READ_BIT;
-
-                std::vector<Graphics::BufferBarrier> bufferBarriers;
-                std::vector<Graphics::ImageBarrier> imageBarriers = {
-                    {rtData->baseColorTexture->image, layout, access},
-                    {rtData->depthTexture->image, layout, access},
-                    {rtData->normalTexture->image, layout, access},
-                    {rtData->geometryNormalTexture->image, layout, access},
-                    {rtData->roughnessMetallicAoTexture->image, layout, access},
-                    {rtData->offsetTexture->image, layout, access},
-                    {rtData->materialIdxTexture->image, layout, access},
-                    {rtData->stencilTexture->image, layout, access},
-                    {rtData->velocityTexture->image, layout, access},
-                    {target->oceanStencilTexture.image, layout, access},
-                    {target->oceanDepthTexture.image, layout, access}
-                };
-
-                commandList->PipelineBarrier(imageBarriers, bufferBarriers, VK_PIPELINE_STAGE_ALL_GRAPHICS_BIT);
-            }*/
-
-
-
-            {
-                Graphics::Profiler::BeginQuery("Lighting pass");
-
-                commandList->ImageMemoryBarrier(target->lightingTexture.image, VK_IMAGE_LAYOUT_GENERAL,
-                    VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT);
-
-                directLightRenderer.Render(viewport, target, camera, scene, commandList);
-
-                commandList->ImageMemoryBarrier(target->lightingTexture.image, VK_IMAGE_LAYOUT_GENERAL,
-                    VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT);
-
-
-                Graphics::ImageBarrier outBarrier(target->lightingTexture.image,
-                    VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, VK_ACCESS_SHADER_READ_BIT);
-                commandList->ImageMemoryBarrier(outBarrier, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT,
-                    VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT | VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT);
-
-                Graphics::Profiler::EndQuery();
-            }
-
-            // This was needed after the ocean renderer, if we ever want to have alpha transparency we need it again
-            // downscaleRenderer.Downscale(target, commandList);
 
             {
 
@@ -253,7 +121,7 @@ namespace Atlas {
                     commandList->BindPipeline(pipeline);
                     //SetUniforms(camera, scene);
                     {
-                        target->lightingTexture.Bind(commandList, 3, 0);
+                        target->targetData.normalTexture->Bind(commandList, 3, 0);
                     }
 
                     commandList->Draw(6, 1, 0, 0);

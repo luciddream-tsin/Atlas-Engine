@@ -215,13 +215,19 @@ namespace Atlas {
         Texture::Texture2D lightingTexture;
         Texture::Texture2D hdrTexture;
 
+
+
+
+
+
+        RenderTargetData targetData;
+
     private:
         void CreateFrameBuffers();
 
         Texture::Texture2D historyTexture;
         Texture::Texture2D swapHistoryTexture;
 
-        RenderTargetData targetData;
         RenderTargetData targetDataDownsampled2x;
         RenderTargetData targetDataSwapDownsampled2x;
 

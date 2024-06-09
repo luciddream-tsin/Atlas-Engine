@@ -150,7 +150,7 @@ namespace Atlas {
             commandList->BindImage(targetData->materialIdxTexture->image, targetData->materialIdxTexture->sampler, 1, 7);
             commandList->BindImage(targetData->depthTexture->image, targetData->depthTexture->sampler, 1, 8);
 
-            if (!target->HasHistory()) {
+            /*if (!target->HasHistory()) {
                 auto rtData = target->GetHistoryData(HALF_RES);
                 VkImageLayout layout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
                 VkAccessFlags access = VK_ACCESS_SHADER_READ_BIT;
@@ -173,9 +173,9 @@ namespace Atlas {
                     {target->historyVolumetricCloudsTexture.image, layout, access}
                 };
                 commandList->PipelineBarrier(imageBarriers, bufferBarriers, VK_PIPELINE_STAGE_ALL_COMMANDS_BIT);
-            }
+            }*/
 
-            {
+            /*{
                 auto rtData = target->GetHistoryData(FULL_RES);
 
                 VkImageLayout layout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
@@ -197,7 +197,7 @@ namespace Atlas {
                 };
 
                 commandList->PipelineBarrier(imageBarriers, bufferBarriers, VK_PIPELINE_STAGE_ALL_GRAPHICS_BIT);
-            }
+            }*/
 
 
 

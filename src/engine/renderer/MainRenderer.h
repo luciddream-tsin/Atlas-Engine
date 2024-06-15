@@ -231,7 +231,7 @@ namespace Atlas {
             // SkyboxRenderer skyboxRenderer;
             PostProcessRenderer postProcessRenderer;
             GBufferDownscaleRenderer downscaleRenderer;
-            GIRenderer giRenderer;
+            // GIRenderer giRenderer;
             // DDGIRenderer ddgiRenderer;
             AORenderer aoRenderer;
             RTReflectionRenderer rtrRenderer;

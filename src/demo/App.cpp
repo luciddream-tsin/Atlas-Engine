@@ -77,7 +77,7 @@ void App::LoadContent() {
 
     // scene->sss = Atlas::CreateRef<Atlas::Lighting::SSS>();
 
-    scene->ssgi = Atlas::CreateRef<Atlas::Lighting::SSGI>();
+    // scene->ssgi = Atlas::CreateRef<Atlas::Lighting::SSGI>();
 
     LoadScene();
 

@@ -127,9 +127,9 @@ namespace Atlas {
 
             TextRenderer textRenderer;
             TextureRenderer textureRenderer;
-            OceanRenderer oceanRenderer;
+            // OceanRenderer oceanRenderer;
             AtmosphereRenderer atmosphereRenderer;
-            PathTracingRenderer pathTracingRenderer;
+            // PathTracingRenderer pathTracingRenderer;
 
         private:
             struct PackedMaterial {

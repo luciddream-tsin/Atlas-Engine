@@ -55,12 +55,12 @@ namespace Atlas {
             indirectLightRenderer.Init(device);
             // skyboxRenderer.Init(device);
             atmosphereRenderer.Init(device);
-            oceanRenderer.Init(device);
+            // oceanRenderer.Init(device);
             // volumetricCloudRenderer.Init(device);
             // volumetricRenderer.Init(device);
             taaRenderer.Init(device);
             postProcessRenderer.Init(device);
-            pathTracingRenderer.Init(device);
+            // pathTracingRenderer.Init(device);
 
             textRenderer.Init(device);
             textureRenderer.Init(device);
@@ -214,7 +214,7 @@ namespace Atlas {
                 Graphics::Profiler::EndQuery();
             }
 
-            oceanRenderer.RenderDepthOnly(viewport, target, camera, scene, commandList);
+            // oceanRenderer.RenderDepthOnly(viewport, target, camera, scene, commandList);
 
             auto targetData = target->GetData(FULL_RES);
 
@@ -326,7 +326,7 @@ namespace Atlas {
                 // volumetricRenderer.Render(viewport, target, camera, scene, commandList);
             }
 
-            oceanRenderer.Render(viewport, target, camera, scene, commandList);
+            // oceanRenderer.Render(viewport, target, camera, scene, commandList);
 
             {
                 taaRenderer.Render(viewport, target, camera, scene, commandList);
@@ -347,7 +347,7 @@ namespace Atlas {
         void MainRenderer::PathTraceScene(Viewport *viewport, PathTracerRenderTarget *target, Camera *camera,
             Scene::Scene *scene, Texture::Texture2D *texture) {
 
-            if (!scene->IsRtDataValid() || !device->swapChain->isComplete)
+            /*if (!scene->IsRtDataValid() || !device->swapChain->isComplete)
                 return;
 
             static vec2 lastJitter = vec2(0.0f);
@@ -441,7 +441,7 @@ namespace Atlas {
 
             commandList->EndCommands();
 
-            device->SubmitCommandList(commandList);
+            device->SubmitCommandList(commandList);*/
 
         }
 

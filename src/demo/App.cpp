@@ -1242,10 +1242,10 @@ void App::CheckLoadScene() {
         scene->irradianceVolume->SetRayCount(512, 32);
     }
     else if (sceneSelection == SPONZA) {
-        scene->irradianceVolume = std::make_shared<Atlas::Lighting::IrradianceVolume>(
-            sceneAABB.Scale(0.9f), glm::ivec3(20));
-        scene->irradianceVolume->SetRayCount(128, 32);
-        scene->irradianceVolume->strength = 1.5f;
+        // scene->irradianceVolume = std::make_shared<Atlas::Lighting::IrradianceVolume>(
+        //     sceneAABB.Scale(0.9f), glm::ivec3(20));
+        // scene->irradianceVolume->SetRayCount(128, 32);
+        // scene->irradianceVolume->strength = 1.5f;
     }
     else if (sceneSelection == BISTRO) {
         scene->irradianceVolume = std::make_shared<Atlas::Lighting::IrradianceVolume>(
@@ -1301,7 +1301,7 @@ void App::CheckLoadScene() {
         scene->irradianceVolume->SetRayCount(128, 32);
     }
 
-    scene->irradianceVolume->useShadowMap = true;
+    // scene->irradianceVolume->useShadowMap = true;
 
     Atlas::Clock::ResetAverage();
 

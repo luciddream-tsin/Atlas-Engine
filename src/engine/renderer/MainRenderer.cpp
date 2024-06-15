@@ -46,7 +46,7 @@ namespace Atlas {
             opaqueRenderer.Init(device);
             shadowRenderer.Init(device);
             downscaleRenderer.Init(device);
-            ddgiRenderer.Init(device);
+            // ddgiRenderer.Init(device);
             giRenderer.Init(device);
             aoRenderer.Init(device);
             rtrRenderer.Init(device);
@@ -197,7 +197,7 @@ namespace Atlas {
                 commandList->PipelineBarrier(imageBarriers, bufferBarriers, VK_PIPELINE_STAGE_ALL_GRAPHICS_BIT);
             }
 
-            ddgiRenderer.TraceAndUpdateProbes(scene, commandList);
+            // ddgiRenderer.TraceAndUpdateProbes(scene, commandList);
 
             {
                 Graphics::Profiler::BeginQuery("Main render pass");
@@ -206,7 +206,7 @@ namespace Atlas {
 
                 opaqueRenderer.Render(viewport, target, camera, scene, commandList, &renderList, materialMap);
 
-                ddgiRenderer.DebugProbes(viewport, target, camera, scene, commandList, materialMap);
+                // ddgiRenderer.DebugProbes(viewport, target, camera, scene, commandList, materialMap);
 
 
                 commandList->EndRenderPass();
@@ -973,12 +973,12 @@ namespace Atlas {
             auto sceneMaterials = scene->GetMaterials();
 
             // For debugging purpose
-            if (scene->irradianceVolume && scene->irradianceVolume->debug) {
-                sceneMaterials.push_back(&ddgiRenderer.probeDebugMaterial);
-                sceneMaterials.push_back(&ddgiRenderer.probeDebugActiveMaterial);
-                sceneMaterials.push_back(&ddgiRenderer.probeDebugInactiveMaterial);
-                sceneMaterials.push_back(&ddgiRenderer.probeDebugOffsetMaterial);
-            }
+            // if (scene->irradianceVolume && scene->irradianceVolume->debug) {
+            //     sceneMaterials.push_back(&ddgiRenderer.probeDebugMaterial);
+            //     sceneMaterials.push_back(&ddgiRenderer.probeDebugActiveMaterial);
+            //     sceneMaterials.push_back(&ddgiRenderer.probeDebugInactiveMaterial);
+            //     sceneMaterials.push_back(&ddgiRenderer.probeDebugOffsetMaterial);
+            // }
 
             uint16_t idx = 0;
 

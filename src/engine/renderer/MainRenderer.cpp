@@ -53,7 +53,7 @@ namespace Atlas {
             sssRenderer.Init(device);
             directLightRenderer.Init(device);
             indirectLightRenderer.Init(device);
-            skyboxRenderer.Init(device);
+            // skyboxRenderer.Init(device);
             atmosphereRenderer.Init(device);
             oceanRenderer.Init(device);
             volumetricCloudRenderer.Init(device);
@@ -275,10 +275,10 @@ namespace Atlas {
             }
 
             {
-                if (scene->sky.probe) {
-                    skyboxRenderer.Render(viewport, target, camera, scene, commandList);
-                }
-                else if (scene->sky.atmosphere) {
+                //if (scene->sky.probe) {
+                //    skyboxRenderer.Render(viewport, target, camera, scene, commandList);
+                //}
+                if (scene->sky.atmosphere) {
                     atmosphereRenderer.Render(viewport, target, camera, scene, commandList);
                 }
             }

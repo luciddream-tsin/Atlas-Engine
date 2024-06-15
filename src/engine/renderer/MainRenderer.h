@@ -228,7 +228,7 @@ namespace Atlas {
             IndirectLightRenderer indirectLightRenderer;
 
             TemporalAARenderer taaRenderer;
-            SkyboxRenderer skyboxRenderer;
+            // SkyboxRenderer skyboxRenderer;
             PostProcessRenderer postProcessRenderer;
             GBufferDownscaleRenderer downscaleRenderer;
             GIRenderer giRenderer;

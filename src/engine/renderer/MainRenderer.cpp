@@ -50,7 +50,7 @@ namespace Atlas {
             giRenderer.Init(device);
             aoRenderer.Init(device);
             rtrRenderer.Init(device);
-            sssRenderer.Init(device);
+            // sssRenderer.Init(device);
             directLightRenderer.Init(device);
             indirectLightRenderer.Init(device);
             // skyboxRenderer.Init(device);
@@ -290,7 +290,7 @@ namespace Atlas {
 
             rtrRenderer.Render(viewport, target, camera, scene, commandList);
 
-            sssRenderer.Render(viewport, target, camera, scene, commandList);
+            // sssRenderer.Render(viewport, target, camera, scene, commandList);
 
             {
                 Graphics::Profiler::BeginQuery("Lighting pass");

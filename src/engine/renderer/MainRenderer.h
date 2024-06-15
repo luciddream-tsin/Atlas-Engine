@@ -235,7 +235,7 @@ namespace Atlas {
             DDGIRenderer ddgiRenderer;
             AORenderer aoRenderer;
             RTReflectionRenderer rtrRenderer;
-            SSSRenderer sssRenderer;
+            // SSSRenderer sssRenderer;
             // VolumetricRenderer volumetricRenderer;
             // VolumetricCloudRenderer volumetricCloudRenderer;
 

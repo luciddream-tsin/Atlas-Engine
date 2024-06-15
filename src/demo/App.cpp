@@ -75,7 +75,7 @@ void App::LoadContent() {
     scene->postProcessing.sharpen.enable = true;
     scene->postProcessing.sharpen.factor = 0.15f;
 
-    scene->sss = Atlas::CreateRef<Atlas::Lighting::SSS>();
+    // scene->sss = Atlas::CreateRef<Atlas::Lighting::SSS>();
 
     scene->ssgi = Atlas::CreateRef<Atlas::Lighting::SSGI>();
 
@@ -830,14 +830,15 @@ bool App::LoadScene() {
     Atlas::Texture::Cubemap sky;
     directionalLight->direction = glm::vec3(0.0f, -1.0f, 1.0f);
 
-    scene->sky.clouds = Atlas::CreateRef<Atlas::Lighting::VolumetricClouds>();
-    scene->sky.clouds->minHeight = 1400.0f;
-    scene->sky.clouds->maxHeight = 1700.0f;
-    scene->sky.clouds->castShadow = false;
+    // scene->sky.clouds = Atlas::CreateRef<Atlas::Lighting::VolumetricClouds>();
+    // scene->sky.clouds->minHeight = 1400.0f;
+    // scene->sky.clouds->maxHeight = 1700.0f;
+    // scene->sky.clouds->castShadow = false;
 
     scene->sky.probe = nullptr;
-    scene->sky.clouds->enable = true;
-    scene->sss->enable = true;
+
+    // scene->sky.clouds->enable = true;
+    // scene->sss->enable = true;
 
     using namespace Atlas::Loader;
 

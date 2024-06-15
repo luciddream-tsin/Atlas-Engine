@@ -273,7 +273,7 @@ void App::Render(float deltaTime) {
         }
 
         if (ImGui::Begin("Settings", (bool*)0, ImGuiWindowFlags_HorizontalScrollbar)) {
-            // if(pathTrace) ImGui::Text("Samples: %d", mainRenderer->pathTracingRenderer.GetSampleCount());
+            if(pathTrace) ImGui::Text("Samples: %d", mainRenderer->pathTracingRenderer.GetSampleCount());
             ImGui::Text("Average frametime: %.3f ms", averageFramerate * 1000.0f);
             ImGui::Text("Current frametime: %.3f ms", deltaTime * 1000.0f);
             ImGui::Text("Camera location: %s", vecToString(camera.location).c_str());
@@ -359,7 +359,7 @@ void App::Render(float deltaTime) {
             }
             if (ImGui::CollapsingHeader("Pathtracing")) {
                 bool pathTraceEnabled = pathTrace;
-                /*ImGui::Checkbox("Enable##Pathtrace", &pathTrace);
+                ImGui::Checkbox("Enable##Pathtrace", &pathTrace);
                 ImGui::SliderInt("Bounces##Pathtrace", &mainRenderer->pathTracingRenderer.bounces, 0, 100);
                 ImGui::Checkbox("Sample emissives##Pathtrace", &mainRenderer->pathTracingRenderer.sampleEmissives);
                 ImGui::Text("Realtime");
@@ -368,7 +368,7 @@ void App::Render(float deltaTime) {
                 ImGui::Text("Realtime denoiser");
                 ImGui::SliderInt("Max accumulated frames##Pathtrace", &mainRenderer->pathTracingRenderer.historyLengthMax, 1, 256);
                 ImGui::SliderFloat("Current clip##Pathtrace", &mainRenderer->pathTracingRenderer.currentClipFactor, 0.1f, 4.0f);
-                ImGui::SliderFloat("Max history clip##Pathtrace", &mainRenderer->pathTracingRenderer.historyClipMax, 0.0f, 1.0f);*/
+                ImGui::SliderFloat("Max history clip##Pathtrace", &mainRenderer->pathTracingRenderer.historyClipMax, 0.0f, 1.0f);
             }
             if (ImGui::CollapsingHeader("DDGI")) {
                 ImGui::Text("Probe count: %s", vecToString(volume->probeCount).c_str());

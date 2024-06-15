@@ -225,14 +225,14 @@ namespace Atlas {
             OpaqueRenderer opaqueRenderer;
             ShadowRenderer shadowRenderer;
             DirectLightRenderer directLightRenderer;
-            IndirectLightRenderer indirectLightRenderer;
+            // IndirectLightRenderer indirectLightRenderer;
 
             TemporalAARenderer taaRenderer;
             // SkyboxRenderer skyboxRenderer;
             PostProcessRenderer postProcessRenderer;
-            GBufferDownscaleRenderer downscaleRenderer;
+            // GBufferDownscaleRenderer downscaleRenderer;
             // GIRenderer giRenderer;
-            DDGIRenderer ddgiRenderer;
+            // DDGIRenderer ddgiRenderer;
             // AORenderer aoRenderer;
             // RTReflectionRenderer rtrRenderer;
             // SSSRenderer sssRenderer;

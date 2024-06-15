@@ -45,14 +45,14 @@ namespace Atlas {
 
             opaqueRenderer.Init(device);
             shadowRenderer.Init(device);
-            downscaleRenderer.Init(device);
-            ddgiRenderer.Init(device);
+            // downscaleRenderer.Init(device);
+            // ddgiRenderer.Init(device);
             // giRenderer.Init(device);
             // aoRenderer.Init(device);
             // rtrRenderer.Init(device);
             // sssRenderer.Init(device);
             directLightRenderer.Init(device);
-            indirectLightRenderer.Init(device);
+            // indirectLightRenderer.Init(device);
             // skyboxRenderer.Init(device);
             atmosphereRenderer.Init(device);
             // oceanRenderer.Init(device);
@@ -197,7 +197,7 @@ namespace Atlas {
                 commandList->PipelineBarrier(imageBarriers, bufferBarriers, VK_PIPELINE_STAGE_ALL_GRAPHICS_BIT);
             }
 
-            ddgiRenderer.TraceAndUpdateProbes(scene, commandList);
+            // ddgiRenderer.TraceAndUpdateProbes(scene, commandList);
 
             {
                 Graphics::Profiler::BeginQuery("Main render pass");
@@ -206,7 +206,7 @@ namespace Atlas {
 
                 opaqueRenderer.Render(viewport, target, camera, scene, commandList, &renderList, materialMap);
 
-                ddgiRenderer.DebugProbes(viewport, target, camera, scene, commandList, materialMap);
+                // ddgiRenderer.DebugProbes(viewport, target, camera, scene, commandList, materialMap);
 
 
                 commandList->EndRenderPass();
@@ -284,7 +284,7 @@ namespace Atlas {
                 }
             }
 
-            downscaleRenderer.Downscale(target, commandList);
+            // downscaleRenderer.Downscale(target, commandList);
 
             // aoRenderer.Render(viewport, target, camera, scene, commandList);
             // rtrRenderer.Render(viewport, target, camera, scene, commandList);
@@ -303,10 +303,10 @@ namespace Atlas {
                 //     VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT);
                 // giRenderer.Render(viewport, target, camera, scene, commandList);
 
-                commandList->ImageMemoryBarrier(target->lightingTexture.image, VK_IMAGE_LAYOUT_GENERAL,
-                    VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT);
+               //  commandList->ImageMemoryBarrier(target->lightingTexture.image, VK_IMAGE_LAYOUT_GENERAL,
+               //      VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT);
 
-                indirectLightRenderer.Render(viewport, target, camera, scene, commandList);
+                // indirectLightRenderer.Render(viewport, target, camera, scene, commandList);
 
                 Graphics::ImageBarrier outBarrier(target->lightingTexture.image,
                     VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, VK_ACCESS_SHADER_READ_BIT);
@@ -972,10 +972,10 @@ namespace Atlas {
 
             // For debugging purpose
             if (scene->irradianceVolume && scene->irradianceVolume->debug) {
-                sceneMaterials.push_back(&ddgiRenderer.probeDebugMaterial);
+                /*sceneMaterials.push_back(&ddgiRenderer.probeDebugMaterial);
                 sceneMaterials.push_back(&ddgiRenderer.probeDebugActiveMaterial);
                 sceneMaterials.push_back(&ddgiRenderer.probeDebugInactiveMaterial);
-                sceneMaterials.push_back(&ddgiRenderer.probeDebugOffsetMaterial);
+                sceneMaterials.push_back(&ddgiRenderer.probeDebugOffsetMaterial);*/
             }
 
             uint16_t idx = 0;

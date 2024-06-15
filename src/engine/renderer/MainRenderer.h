@@ -232,7 +232,7 @@ namespace Atlas {
             PostProcessRenderer postProcessRenderer;
             GBufferDownscaleRenderer downscaleRenderer;
             // GIRenderer giRenderer;
-            // DDGIRenderer ddgiRenderer;
+            DDGIRenderer ddgiRenderer;
             AORenderer aoRenderer;
             RTReflectionRenderer rtrRenderer;
             // SSSRenderer sssRenderer;

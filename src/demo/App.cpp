@@ -56,12 +56,14 @@ void App::LoadContent() {
 
     scene->sky.sun = directionalLight;
 
-    scene->ao = Atlas::CreateRef<Atlas::Lighting::AO>(16);
-    scene->ao->rt = true;
+    // scene->ao = Atlas::CreateRef<Atlas::Lighting::AO>(16);
+    // scene->ao->rt = true;
+
     // Use SSGI by default
-    scene->ao->enable = false; 
-    scene->reflection = Atlas::CreateRef<Atlas::Lighting::Reflection>(1);
-    scene->reflection->useShadowMap = true;
+    // scene->ao->enable = false;
+
+    // scene->reflection = Atlas::CreateRef<Atlas::Lighting::Reflection>(1);
+    // scene->reflection->useShadowMap = true;
 
     scene->fog = Atlas::CreateRef<Atlas::Lighting::Fog>();
     scene->fog->enable = true;

@@ -233,8 +233,8 @@ namespace Atlas {
             GBufferDownscaleRenderer downscaleRenderer;
             // GIRenderer giRenderer;
             DDGIRenderer ddgiRenderer;
-            AORenderer aoRenderer;
-            RTReflectionRenderer rtrRenderer;
+            // AORenderer aoRenderer;
+            // RTReflectionRenderer rtrRenderer;
             // SSSRenderer sssRenderer;
             // VolumetricRenderer volumetricRenderer;
             // VolumetricCloudRenderer volumetricCloudRenderer;

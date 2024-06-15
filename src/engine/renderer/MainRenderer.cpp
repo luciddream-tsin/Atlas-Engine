@@ -48,8 +48,8 @@ namespace Atlas {
             downscaleRenderer.Init(device);
             ddgiRenderer.Init(device);
             // giRenderer.Init(device);
-            aoRenderer.Init(device);
-            rtrRenderer.Init(device);
+            // aoRenderer.Init(device);
+            // rtrRenderer.Init(device);
             // sssRenderer.Init(device);
             directLightRenderer.Init(device);
             indirectLightRenderer.Init(device);
@@ -286,9 +286,8 @@ namespace Atlas {
 
             downscaleRenderer.Downscale(target, commandList);
 
-            aoRenderer.Render(viewport, target, camera, scene, commandList);
-
-            rtrRenderer.Render(viewport, target, camera, scene, commandList);
+            // aoRenderer.Render(viewport, target, camera, scene, commandList);
+            // rtrRenderer.Render(viewport, target, camera, scene, commandList);
 
             // sssRenderer.Render(viewport, target, camera, scene, commandList);
 

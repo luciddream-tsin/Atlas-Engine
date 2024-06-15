@@ -44,11 +44,7 @@ namespace Atlas {
             ddgiUniformBuffer = device->CreateMultiBuffer(uniformBufferDesc);
 
             opaqueRenderer.Init(device);
-            impostorRenderer.Init(device);
-            terrainRenderer.Init(device);
             shadowRenderer.Init(device);
-            impostorShadowRenderer.Init(device);
-            terrainShadowRenderer.Init(device);
             downscaleRenderer.Init(device);
             ddgiRenderer.Init(device);
             giRenderer.Init(device);
@@ -136,9 +132,6 @@ namespace Atlas {
             auto materialBuffer = device->CreateBuffer(materialBufferDesc);
             commandList->BindBuffer(materialBuffer, 1, 14);
 
-            if (scene->vegetation)
-                vegetationRenderer.helper.PrepareInstanceBuffer(*scene->vegetation, camera, commandList);
-
             if (scene->ocean && scene->ocean->enable)
                 scene->ocean->simulation.Compute(commandList);
 
@@ -165,7 +158,7 @@ namespace Atlas {
             {
                 shadowRenderer.Render(viewport, target, camera, scene, commandList, &renderList);
 
-                terrainShadowRenderer.Render(viewport, target, camera, scene, commandList);
+                // terrainShadowRenderer.Render(viewport, target, camera, scene, commandList);
             }
 
             if (scene->sky.GetProbe()) {
@@ -215,11 +208,6 @@ namespace Atlas {
 
                 ddgiRenderer.DebugProbes(viewport, target, camera, scene, commandList, materialMap);
 
-                vegetationRenderer.Render(viewport, target, camera, scene, commandList, materialMap);
-
-                terrainRenderer.Render(viewport, target, camera, scene, commandList, materialMap);
-
-                impostorRenderer.Render(viewport, target, camera, scene, commandList, &renderList, materialMap);
 
                 commandList->EndRenderPass();
 

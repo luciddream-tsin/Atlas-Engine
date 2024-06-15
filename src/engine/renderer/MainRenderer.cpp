@@ -279,6 +279,7 @@ namespace Atlas {
                 //    skyboxRenderer.Render(viewport, target, camera, scene, commandList);
                 //}
                 if (scene->sky.atmosphere) {
+                    // 
                     atmosphereRenderer.Render(viewport, target, camera, scene, commandList);
                 }
             }

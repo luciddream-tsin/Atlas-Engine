@@ -236,8 +236,8 @@ namespace Atlas {
             AORenderer aoRenderer;
             RTReflectionRenderer rtrRenderer;
             SSSRenderer sssRenderer;
-            VolumetricRenderer volumetricRenderer;
-            VolumetricCloudRenderer volumetricCloudRenderer;
+            // VolumetricRenderer volumetricRenderer;
+            // VolumetricCloudRenderer volumetricCloudRenderer;
 
             RenderList renderList;
 

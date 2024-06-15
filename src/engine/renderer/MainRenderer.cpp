@@ -56,8 +56,8 @@ namespace Atlas {
             // skyboxRenderer.Init(device);
             atmosphereRenderer.Init(device);
             oceanRenderer.Init(device);
-            volumetricCloudRenderer.Init(device);
-            volumetricRenderer.Init(device);
+            // volumetricCloudRenderer.Init(device);
+            // volumetricRenderer.Init(device);
             taaRenderer.Init(device);
             postProcessRenderer.Init(device);
             pathTracingRenderer.Init(device);
@@ -168,7 +168,7 @@ namespace Atlas {
                     scene->sky.GetProbe()->filteredDiffuse.sampler, 1, 11);
             }
 
-            volumetricCloudRenderer.RenderShadow(viewport, target, camera, scene, commandList);
+            // volumetricCloudRenderer.RenderShadow(viewport, target, camera, scene, commandList);
 
             {
                 VkImageLayout layout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
@@ -279,7 +279,7 @@ namespace Atlas {
                 //    skyboxRenderer.Render(viewport, target, camera, scene, commandList);
                 //}
                 if (scene->sky.atmosphere) {
-                    // 
+                    //
                     atmosphereRenderer.Render(viewport, target, camera, scene, commandList);
                 }
             }
@@ -322,9 +322,8 @@ namespace Atlas {
             // downscaleRenderer.Downscale(target, commandList);
 
             {
-                volumetricCloudRenderer.Render(viewport, target, camera, scene, commandList);
-
-                volumetricRenderer.Render(viewport, target, camera, scene, commandList);
+                // volumetricCloudRenderer.Render(viewport, target, camera, scene, commandList);
+                // volumetricRenderer.Render(viewport, target, camera, scene, commandList);
             }
 
             oceanRenderer.Render(viewport, target, camera, scene, commandList);
